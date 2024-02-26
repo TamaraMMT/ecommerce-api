@@ -1,0 +1,31 @@
+version: "3.10"
+
+services:
+  project:
+    user: "${UID}:${GID}"
+    build:
+      context: .
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./project:/project
+    command: >
+      sh -c "python manage.py runserver 0.0.0.0:8000"
+    environment:
+      - DB_HOST=db
+      - DB_NAME=devdb
+      - DB_USER=devuser
+      - DB_PASSWORD=123pass
+    depends_on:
+      - db
+
+  db:
+    image: postgres:15-alpine
+    volumes:
+      - data-db-dev:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_DB=devdb
+      - POSTGRES_USER=devuser
+      - POSTGRES_PASSWORD=123pass
+volumes:
+  data-db-dev:
