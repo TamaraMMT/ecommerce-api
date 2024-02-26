@@ -2,7 +2,6 @@ version: "3.10"
 
 services:
   project:
-    user: "${UID}:${GID}"
     build:
       context: .
     ports:
@@ -10,11 +9,13 @@ services:
     volumes:
       - ./project:/project
     command: >
-      sh -c "python manage.py runserver 0.0.0.0:8000"
+      sh -c "python manage.py makemigrations &&
+            python manage.py migrate &&
+            python manage.py runserver 0.0.0.0:8000"
     environment:
       - DB_HOST=db
       - DB_NAME=devdb
-      - DB_USER=devuser
+      - DB_USER=postgres
       - DB_PASSWORD=123pass
     depends_on:
       - db
@@ -25,7 +26,15 @@ services:
       - data-db-dev:/var/lib/postgresql/data
     environment:
       - POSTGRES_DB=devdb
-      - POSTGRES_USER=devuser
+      - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=123pass
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
 volumes:
   data-db-dev:
