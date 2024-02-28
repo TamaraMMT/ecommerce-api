@@ -34,6 +34,8 @@ class Manager(BaseUserManager):
 class User(AbstractBaseUser, PermissionsMixin):
     """User in the system"""
     email = models.EmailField(max_length=255, unique=True)
+    firstname = models.CharField(max_length=255)
+    lastname = models.CharField(max_length=255)
     password = models.CharField(max_length=366)
     is_staff = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
