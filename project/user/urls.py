@@ -2,19 +2,14 @@
 URL mappings for the user API.
 """
 from django.urls import path
-from rest_framework_simplejwt.views import (
-    TokenObtainPairView,
-    TokenRefreshView,
-    TokenVerifyView,
-)
+
 from user import views
 
 
 app_name = 'user'
 
 urlpatterns = [
-    path('register/', views.RegisterUserView.as_view(), name='register'),
-    path('token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
-    path('token/verify/', TokenVerifyView.as_view(), name='token_verify'),
-    path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
+    path('create/', views.CreateUserView.as_view(), name='create'),
+    path('token/', views.CreateTokenView.as_view(), name='token'),
+    path('me/', views.ManageUserView.as_view(), name='me'),
 ]
