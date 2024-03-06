@@ -11,8 +11,8 @@ from rest_framework.test import APIClient
 from rest_framework import status
 
 
-REGISTER_USER_URL = reverse('user:register')
-TOKEN_URL = reverse('user:token_obtain_pair')
+REGISTER_USER_URL = reverse('user:create')
+TOKEN_URL = reverse('user:token')
 
 def create_user(**params):
     """Create new user and return"""
@@ -84,7 +84,7 @@ class PublicUser(TestCase):
         }
         response = self.client.post(TOKEN_URL, data_user)
 
-        self.assertIn('access', response.data)
+        self.assertIn('token', response.data)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_access_token_user_unauthorized(self):
@@ -100,6 +100,6 @@ class PublicUser(TestCase):
         }
         response = self.client.post(TOKEN_URL, data_user)
 
-        self.assertNotIn('access', response.data)
-        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+        self.assertNotIn('token', response.data)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
