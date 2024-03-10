@@ -45,8 +45,10 @@ INSTALLED_APPS = [
     'core',
     'user',
     'customer',
+    'product',
     'rest_framework.authtoken',
     'rest_framework_simplejwt',
+    'mptt',
 ]
 
 MIDDLEWARE = [
@@ -148,7 +150,10 @@ REST_FRAMEWORK = {
     ),
     'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
 }
-
+SPECTACULAR_SETTINGS = {
+    "TITLE": "Ecommerce API",
+    "DESCRIPTION": 'DRF PROJECT',
+}
 
 SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": timedelta(minutes=10),
@@ -157,3 +162,4 @@ SIMPLE_JWT = {
     "SIGNING_KEY": os.environ.get('SECRET_KEY_JWT', 'INSECURE'),
     "AUTH_HEADER_TYPES": ("Bearer",),
 }
+
