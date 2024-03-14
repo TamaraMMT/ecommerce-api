@@ -3,6 +3,7 @@ from rest_framework import serializers
 from .models import (
     Category,
     Product,
+    ProductLine
 )
 
 
@@ -25,4 +26,18 @@ class ProductSerializer(serializers.ModelSerializer):
             "slug",
             "description",
             "category_name",
+        )
+
+
+
+class ProductlineSerializer(serializers.ModelSerializer):
+    product_name = serializers.CharField(source="product.name")
+
+    class Meta:
+        model = ProductLine
+        fields = (
+            "price",
+            "sku",
+            "stock_qty",
+            "product_name",
         )
