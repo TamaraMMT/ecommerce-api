@@ -9,11 +9,12 @@ from product.models import (
 @admin.register(Category)
 class CategoryAdmin(admin.ModelAdmin):
     list_per_page = 10
-    list_display = ('name', 'parent')
+    list_display = ('name', 'parent', 'is_active')
 
 
 class ProductLineInline(admin.TabularInline):
     model = ProductLine
+
 
 @admin.register(Product)
 class ProductAdmin(admin.ModelAdmin):
@@ -21,3 +22,9 @@ class ProductAdmin(admin.ModelAdmin):
     list_per_page = 10
     list_display = ('name', 'category', 'is_active')
     readonly_fields = ['pid']
+
+
+@admin.register(ProductLine)
+class ProductLineAdmin(admin.ModelAdmin):
+    list_per_page = 10
+    list_display = ('sku', 'price', 'stock_qty', 'is_active', 'product')

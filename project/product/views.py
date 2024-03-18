@@ -1,4 +1,3 @@
-from django.shortcuts import render
 from drf_spectacular.utils import extend_schema
 from rest_framework import viewsets
 from rest_framework.response import Response
@@ -8,12 +7,10 @@ from rest_framework.decorators import action
 from product.models import (
     Category,
     Product,
-    ProductLine
 )
 from .serializers import (
     CategorySerializer,
     ProductSerializer,
-    ProductlineSerializer
 )
 
 
@@ -22,7 +19,7 @@ class CategoryViewSet(viewsets.ViewSet):
     A simple Viewset for viewing all categories
     """
 
-    queryset = Category.objects.all()
+    queryset = Category.objects.filter(is_active=True)
 
     @extend_schema(responses=CategorySerializer)
     def list(self, request):
@@ -35,18 +32,19 @@ class ProductViewSet(viewsets.ViewSet):
     A simple Viewset for viewing all products
     """
 
-    queryset = Product.objects.all()
+    queryset = Product.objects.filter(is_active=True)
+    
     lookup_field = "slug"
+
+    @extend_schema(responses=ProductSerializer)
+    def list(self, request):
+        serializer = ProductSerializer(self.queryset, many=True)
+        return Response(serializer.data)
 
     def retrieve(self, request, slug=None):
         serializer = ProductSerializer(
             self.queryset.filter(slug=slug), many=True
         )
-        return Response(serializer.data)
-
-    @extend_schema(responses=ProductSerializer)
-    def list(self, request):
-        serializer = ProductSerializer(self.queryset, many=True)
         return Response(serializer.data)
 
     @action(
@@ -58,18 +56,20 @@ class ProductViewSet(viewsets.ViewSet):
         """
         An endpoint to return products by category
         """
-        filtered_products = self.queryset.filter(category__name=name)
+        category = self.queryset.filter(category__name=name).select_related(
+            "category"
+        )
 
-        if not filtered_products.exists():
+        if not category.exists():
             return Response(
                 {'error': f'No products found for category: {name}'},
                 status=status.HTTP_404_NOT_FOUND
             )
 
-        serializer = ProductSerializer(filtered_products, many=True)
+        serializer = ProductSerializer(category, many=True)
         return Response(serializer.data)
 
-
+'''
 class ProductlineViewSet(viewsets.ViewSet):
     """
     A simple Viewset for viewing all productsline
@@ -81,3 +81,4 @@ class ProductlineViewSet(viewsets.ViewSet):
     def list(self, request):
         serializer = ProductlineSerializer(self.queryset, many=True)
         return Response(serializer.data)
+        '''

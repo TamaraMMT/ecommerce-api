@@ -4,12 +4,15 @@ from mptt.models import MPTTModel, TreeForeignKey
 from shortuuid.django_fields import ShortUUIDField 
 
 
+
+
 class Category(MPTTModel):
     name = models.CharField(max_length=235, unique=True)
     slug = models.SlugField(max_length=255, unique=True)
     parent = TreeForeignKey(
         "self", on_delete=models.PROTECT, null=True, blank=True
     )
+    is_active = models.BooleanField(default=False)
 
     class MPTTMeta:
         order_insertion_by = ["name"]
@@ -28,6 +31,7 @@ class Product(models.Model):
     category = TreeForeignKey("Category", on_delete=models.PROTECT)
     is_active = models.BooleanField(default=False)
 
+
     def __str__(self):
         return self.name
 
@@ -40,6 +44,7 @@ class ProductLine(models.Model):
         Product, on_delete=models.PROTECT, related_name="product_line"
     )
     is_active = models.BooleanField(default=False)
+
 
     def __str__(self):
         return str(self.sku)
