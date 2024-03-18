@@ -1,6 +1,8 @@
 from django.db import models
 from mptt.models import MPTTModel, TreeForeignKey
 
+from shortuuid.django_fields import ShortUUIDField 
+
 
 class Category(MPTTModel):
     name = models.CharField(max_length=235, unique=True)
@@ -19,7 +21,8 @@ class Category(MPTTModel):
 class Product(models.Model):
     name = models.CharField(max_length=100)
     slug = models.SlugField(max_length=255)
-    pid = models.CharField(max_length=10, unique=True)
+    pid = ShortUUIDField(
+        unique=True, length=8, max_length=10)
     description = models.TextField(blank=True)
     is_digital = models.BooleanField(default=False)
     category = TreeForeignKey("Category", on_delete=models.PROTECT)

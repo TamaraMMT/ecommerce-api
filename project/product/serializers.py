@@ -7,17 +7,16 @@ from .models import (
 )
 
 
-
 class CategorySerializer(serializers.ModelSerializer):
-    category_name = serializers.CharField(source="name")
+    category = serializers.CharField(source="name")
 
     class Meta:
         model = Category
-        fields = ["category_name"]
+        fields = ["category"]
 
 
 class ProductSerializer(serializers.ModelSerializer):
-    category_name = serializers.CharField(source="category.name")
+    category = serializers.CharField(source="category.name")
 
     class Meta:
         model = Product
@@ -25,9 +24,8 @@ class ProductSerializer(serializers.ModelSerializer):
             "name",
             "slug",
             "description",
-            "category_name",
+            "category",
         )
-
 
 
 class ProductlineSerializer(serializers.ModelSerializer):

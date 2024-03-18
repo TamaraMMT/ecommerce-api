@@ -6,8 +6,8 @@ from django.urls import path, include
 
 
 router = DefaultRouter()
-router.register(r"products", ProductViewSet)
-router.register(r"categories", CategoryViewSet, basename='category')
+router.register(r"", ProductViewSet)
+router.register(r"category", CategoryViewSet)
 router.register(r"productline", ProductlineViewSet)
 
 app_name = 'product'
