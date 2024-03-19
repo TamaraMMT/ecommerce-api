@@ -42,12 +42,10 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'drf_spectacular',
+    'rest_framework.authtoken',
     'core',
     'user',
-    'customer',
     'product',
-    'rest_framework.authtoken',
-    'rest_framework_simplejwt',
     'mptt',
 ]
 
@@ -146,20 +144,11 @@ AUTH_USER_MODEL = 'core.User'
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework.authentication.SessionAuthentication',
-        'rest_framework_simplejwt.authentication.JWTAuthentication',
     ),
     'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
 }
 SPECTACULAR_SETTINGS = {
     "TITLE": "Ecommerce API",
     "DESCRIPTION": 'DRF PROJECT',
-}
-
-SIMPLE_JWT = {
-    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=10),
-    "REFRESH_TOKEN_LIFETIME": timedelta(minutes=10),
-    "BLACKLIST_AFTER_ROTATION": False,
-    "SIGNING_KEY": os.environ.get('SECRET_KEY_JWT', 'INSECURE'),
-    "AUTH_HEADER_TYPES": ("Bearer",),
 }
 
