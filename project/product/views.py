@@ -19,11 +19,12 @@ class CategoryViewSet(viewsets.ViewSet):
     A simple Viewset for viewing all categories
     """
 
-    queryset = Category.objects.filter(is_active=True)
+    queryset = Category.objects.all()
 
     @extend_schema(responses=CategorySerializer)
     def list(self, request):
-        serializer = CategorySerializer(self.queryset, many=True)
+        queryset = self.queryset.filter(is_active=True)
+        serializer = CategorySerializer(queryset, many=True)
         return Response(serializer.data)
 
 
@@ -50,19 +51,19 @@ class ProductViewSet(viewsets.ViewSet):
     @action(
         methods=["get"],
         detail=False,
-        url_path=r"category/(?P<name>[\w-]+)",
+        url_path=r"category/(?P<slug>[\w-]+)",
     )
-    def list_product_by_category_name(self, request, name=None):
+    def list_product_by_category_slug(self, request, slug=None):
         """
         An endpoint to return products by category
         """
-        category = self.queryset.filter(category__name=name).select_related(
+        category = self.queryset.filter(category__slug=slug, category__is_active=True).select_related(
             "category"
         )
 
         if not category.exists():
             return Response(
-                {'error': f'No products found for category: {name}'},
+                {'error': f'No products found for category: {slug}'},
                 status=status.HTTP_404_NOT_FOUND
             )
 
