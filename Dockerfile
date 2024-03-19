@@ -6,10 +6,12 @@ ENV PYTHONUNBUFFERED 1
 
 # Copy code and requirements
 COPY ./requirements.txt /tmp/requirements.txt
+COPY ./dev-requirements.txt /tmp/dev-requirements.txt
 COPY ./project /project
 WORKDIR /project
 EXPOSE  8000
 
+ARG DEV=false
 # Create and activate virtual environment and Install development dependencies
 RUN python3 -m venv /venv && \
     /venv/bin/pip install --upgrade pip && \
@@ -17,6 +19,9 @@ RUN python3 -m venv /venv && \
     apk add --update --no-cache --virtual .tmp-build-deps \
         build-base postgresql-dev musl-dev && \
     /venv/bin/pip install -r /tmp/requirements.txt && \
+    if [ $DEV = "true" ]; then \
+        /venv/bin/pip install -r /tmp/dev-requirements.txt ; \
+    fi && \
     rm -rf /tmp &&\
     apk del .tmp-build-deps 
 
