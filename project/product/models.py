@@ -5,7 +5,6 @@ from mptt.models import MPTTModel, TreeForeignKey
 from shortuuid.django_fields import ShortUUIDField 
 
 
-
 class Category(MPTTModel):
     name = models.CharField(max_length=235, unique=True)
     slug = models.SlugField(max_length=255, unique=True)
@@ -31,7 +30,6 @@ class Product(models.Model):
     category = TreeForeignKey("Category", on_delete=models.PROTECT)
     is_active = models.BooleanField(default=False)
 
-
     def __str__(self):
         return self.name
 
@@ -51,3 +49,18 @@ class ProductLine(models.Model):
 
     def __str__(self):
         return str(self.sku)
+
+
+class ProductImage(models.Model):
+    alt_text = models.CharField(max_length=100)
+    url = models.ImageField(upload_to=None, default="test.jpg")
+    product_line = models.ForeignKey(
+        ProductLine, on_delete=models.CASCADE, related_name="product_image"
+    )
+    order = models.PositiveIntegerField(blank=True)
+
+    class Meta:
+        unique_together = ("product_line", "order")
+
+    def __str__(self):
+        return f"{self.product_line.sku}_img"

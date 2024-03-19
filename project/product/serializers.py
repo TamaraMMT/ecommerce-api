@@ -3,19 +3,26 @@ from rest_framework import serializers
 from .models import (
     Category,
     Product,
-    ProductLine
+    ProductLine,
+    ProductImage
 )
 
 
 class CategorySerializer(serializers.ModelSerializer):
-    category = serializers.CharField(source="name")
 
     class Meta:
         model = Category
-        fields = ["category"]
+        fields = ["name"]
+
+
+class ProductImageSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ProductImage
+        fields = ["alt_text", "order"]
 
 
 class ProductlineSerializer(serializers.ModelSerializer):
+    product_image = ProductImageSerializer(many=True)
 
     class Meta:
         model = ProductLine
@@ -23,7 +30,8 @@ class ProductlineSerializer(serializers.ModelSerializer):
             "price",
             "sku",
             "stock_qty",
-            "is_active"
+            "is_active",
+            "product_image"
         )
 
 
