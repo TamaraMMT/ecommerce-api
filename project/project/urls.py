@@ -20,6 +20,7 @@ from drf_spectacular.views import (
 )
 from django.contrib import admin
 from django.urls import path, include
+from project import settings
 
 
 urlpatterns = [
@@ -33,3 +34,7 @@ urlpatterns = [
     path('api/user/', include('user.urls')),
     path('api/product/', include('product.urls')),
 ]
+
+
+if settings.DEBUG:
+    urlpatterns += [path('__debug__/', include('debug_toolbar.urls')),]
