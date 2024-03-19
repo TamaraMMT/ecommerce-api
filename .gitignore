@@ -164,6 +164,7 @@ cython_debug/
 #.idea/
 
 
+**/migrations/*.py
 
 #docker 
 .dockerignore
