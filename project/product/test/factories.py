@@ -13,6 +13,7 @@ class CategoryFactory(DjangoModelFactory):
 
     name = factory.Sequence(lambda n: f"test_category_{n}")
     slug = factory.Sequence(lambda n: f"test_slug_{n}")
+    is_active = True
 
 
 class ProductFactory(DjangoModelFactory):
@@ -37,3 +38,4 @@ class ProductlineFactory(DjangoModelFactory):
     stock_qty = factory.Sequence(lambda n: f"0000_{n}")
     product = factory.SubFactory(ProductFactory)
     is_active = True
+    order = factory.Sequence(lambda n: int(n))

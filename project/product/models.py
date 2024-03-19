@@ -1,8 +1,8 @@
 from django.db import models
+
 from mptt.models import MPTTModel, TreeForeignKey
 
 from shortuuid.django_fields import ShortUUIDField 
-
 
 
 
@@ -44,7 +44,10 @@ class ProductLine(models.Model):
         Product, on_delete=models.PROTECT, related_name="product_line"
     )
     is_active = models.BooleanField(default=False)
+    order = models.PositiveIntegerField()
 
+    class Meta:
+        unique_together = ("product", "order")
 
     def __str__(self):
         return str(self.sku)

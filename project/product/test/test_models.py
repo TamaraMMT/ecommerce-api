@@ -13,6 +13,6 @@ class TestCategoryModel:
 
 class TestProductlineModel:
     def test_str_sku_output_(self, productline_factory):
-        productline = productline_factory()
+        productline = productline_factory(sku='test_SKU_0')
 
-        assert productline.__str__() == 'test_SKU_1'
+        assert productline.__str__() == 'test_SKU_0'
