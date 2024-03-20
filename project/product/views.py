@@ -47,7 +47,10 @@ class ProductViewSet(viewsets.ViewSet):
     def retrieve(self, request, slug=None):
         """list all products by slug"""
         serializer = ProductSerializer(
-            self.queryset.filter(slug=slug), many=True
+            self.queryset.filter(slug=slug)
+            .select_related("category")
+            .prefetch_related(Prefetch("product_line__product_image")),
+            many=True
         )
         return Response(serializer.data)
 
