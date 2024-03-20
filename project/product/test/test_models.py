@@ -35,3 +35,15 @@ class TestProductlineModel:
 
         with pytest.raises(IntegrityError):
             productline_factory(product=product, order=1)
+
+
+class TestProductImageModel:
+    def test_str_image_productline(
+        self,
+        productline_factory,
+        product_image_factory
+    ):
+        productline = productline_factory(sku="sku_test")
+        image = product_image_factory(order=1, product_line=productline)
+
+        assert image.__str__() == 'sku_test_img'

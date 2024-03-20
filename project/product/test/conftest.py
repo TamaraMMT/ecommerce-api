@@ -5,12 +5,15 @@ from rest_framework.test import APIClient
 from .factories import (
     CategoryFactory,
     ProductFactory,
-    ProductlineFactory
+    ProductlineFactory,
+    ProductImageFactory
 )
 
 register(CategoryFactory)
 register(ProductFactory)
 register(ProductlineFactory)
+register(ProductImageFactory)
+
 
 @pytest.fixture
 def api_client():

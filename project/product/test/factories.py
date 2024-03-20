@@ -3,7 +3,8 @@ import factory
 from product.models import (
     Category,
     Product,
-    ProductLine
+    ProductLine,
+    ProductImage
 )
 
 
@@ -38,4 +39,14 @@ class ProductlineFactory(DjangoModelFactory):
     stock_qty = factory.Sequence(lambda n: f"0000_{n}")
     product = factory.SubFactory(ProductFactory)
     is_active = True
+    order = factory.Sequence(lambda n: int(n))
+
+
+class ProductImageFactory(DjangoModelFactory):
+    class Meta:
+        model = ProductImage
+
+    alt_text = "test alternative text"
+    url = "test.jpg"
+    product_line = factory.SubFactory(ProductlineFactory)
     order = factory.Sequence(lambda n: int(n))
