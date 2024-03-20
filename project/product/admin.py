@@ -13,7 +13,7 @@ from product.models import (
 @admin.register(Category)
 class CategoryAdmin(admin.ModelAdmin):
     list_per_page = 10
-    list_display = ('name', 'parent', 'is_active')
+    list_display = ('name', 'parent', 'slug', 'is_active')
 
 
 class EditLinkInline(object):
@@ -38,7 +38,7 @@ class ProductLineInline(EditLinkInline, admin.TabularInline):
 class ProductAdmin(admin.ModelAdmin):
     inlines = [ProductLineInline]
     list_per_page = 10
-    list_display = ('name', 'category', 'is_active')
+    list_display = ('name', 'category', 'slug', 'is_active')
     readonly_fields = ['pid']
 
 
