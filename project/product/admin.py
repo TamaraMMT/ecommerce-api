@@ -6,7 +6,9 @@ from product.models import (
     Category,
     Product,
     ProductLine,
-    ProductImage
+    ProductImage,
+    AttributeValue,
+    AttributeType,
 )
 
 
@@ -46,8 +48,16 @@ class ProductImageInline(admin.TabularInline):
     model = ProductImage
 
 
+class AttributeValueInline(admin.TabularInline):
+    model = AttributeValue.productline_attr_value.through
+
+
 @admin.register(ProductLine)
 class ProductLineAdmin(admin.ModelAdmin):
     list_per_page = 10
     list_display = ('sku', 'price', 'stock_qty', 'is_active', 'product')
-    inlines = [ProductImageInline]
+    inlines = [ProductImageInline, AttributeValueInline]
+
+
+admin.site.register(AttributeType)
+admin.site.register(AttributeValue)

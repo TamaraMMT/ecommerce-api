@@ -4,7 +4,9 @@ from .models import (
     Category,
     Product,
     ProductLine,
-    ProductImage
+    ProductImage,
+    AttributeType,
+    AttributeValue
 )
 
 
@@ -21,8 +23,20 @@ class ProductImageSerializer(serializers.ModelSerializer):
         fields = ["alt_text", "order"]
 
 
+class AttributeValueSerializer(serializers.ModelSerializer):
+    attribute_type = serializers.CharField(source="attribute_type.name")
+
+    class Meta:
+        model = AttributeValue
+        fields = (
+            "attribute_type",
+            "attribute_value",
+        )
+
+
 class ProductlineSerializer(serializers.ModelSerializer):
     product_image = ProductImageSerializer(many=True)
+    attribute_value = AttributeValueSerializer(many=True)
 
     class Meta:
         model = ProductLine
@@ -31,7 +45,8 @@ class ProductlineSerializer(serializers.ModelSerializer):
             "sku",
             "stock_qty",
             "is_active",
-            "product_image"
+            "product_image",
+            "attribute_value"
         )
 
 
@@ -46,5 +61,5 @@ class ProductSerializer(serializers.ModelSerializer):
             "slug",
             "description",
             "category",
-            "product_line"
+            "product_line",
         )

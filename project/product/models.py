@@ -18,12 +18,13 @@ class Category(MPTTModel):
     is_active = models.BooleanField(default=True)
 
     objects = IsActiveManager()
-    
+
     class MPTTMeta:
         order_insertion_by = ["name"]
 
     def __str__(self):
         return self.name
+
 
 class Product(models.Model):
     name = models.CharField(max_length=100)
@@ -44,12 +45,17 @@ class Product(models.Model):
 class ProductLine(models.Model):
     price = models.DecimalField(decimal_places=2, max_digits=5)
     sku = models.CharField(max_length=10)
-    stock_qty = models.IntegerField()
+    stock_qty = models.PositiveIntegerField()
     product = models.ForeignKey(
         Product, on_delete=models.PROTECT, related_name="product_line"
     )
     is_active = models.BooleanField(default=False)
     order = models.PositiveIntegerField()
+    attribute_value = models.ManyToManyField(
+        "AttributeValue",
+        through="ProductlineAttributeValue",
+        related_name="productline_attr_value",
+    )
 
     objects = IsActiveManager()
 
@@ -68,9 +74,42 @@ class ProductImage(models.Model):
     )
     order = models.PositiveIntegerField(blank=True)
 
-
     class Meta:
         unique_together = ("product_line", "order")
 
     def __str__(self):
         return f"{self.product_line.sku}_img"
+
+
+class AttributeType(models.Model):
+    name = models.CharField(max_length=100, unique=True)
+    description = models.TextField(blank=True)
+
+    def __str__(self):
+        return self.name
+
+
+class AttributeValue(models.Model):
+    attribute_value = models.CharField(max_length=100)
+    attribute_type = models.ForeignKey(
+        AttributeType, on_delete=models.CASCADE, related_name="attribute_type"
+    )
+
+    def __str__(self):
+        return f"{self.attribute_type.name}-{self.attribute_value}"
+
+
+class ProductlineAttributeValue(models.Model):
+    attribute_value = models.ForeignKey(
+        AttributeValue,
+        on_delete=models.CASCADE,
+        related_name="product_value_av",
+    )
+    productline = models.ForeignKey(
+        "Productline",
+        on_delete=models.CASCADE,
+        related_name="productline_value_pl",
+    )
+
+    class Meta:
+        unique_together = ("attribute_value", "productline")
