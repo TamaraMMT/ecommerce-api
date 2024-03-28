@@ -6,7 +6,8 @@ from .models import (
     ProductLine,
     ProductImage,
     AttributeType,
-    AttributeValue
+    AttributeValue,
+    ProductlineAttributeValue
 )
 
 
@@ -20,17 +21,33 @@ class CategorySerializer(serializers.ModelSerializer):
 class ProductImageSerializer(serializers.ModelSerializer):
     class Meta:
         model = ProductImage
-        fields = ["alt_text", "order"]
+        fields = ("alt_text", "order")
+
+
+class AttributeTypeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = AttributeType
+        fields = ("name", "id")
 
 
 class AttributeValueSerializer(serializers.ModelSerializer):
-    attribute_type = serializers.CharField(source="attribute_type.name")
+    attribute_type = AttributeTypeSerializer(many=False)
 
     class Meta:
         model = AttributeValue
         fields = (
             "attribute_type",
             "attribute_value",
+        )
+
+
+class ProductlineAttributeValueSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = ProductlineAttributeValue
+        fields = (
+            "attribute_value",
+            "productline",
         )
 
 
@@ -49,10 +66,23 @@ class ProductlineSerializer(serializers.ModelSerializer):
             "attribute_value"
         )
 
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        av_data = data.pop("attribute_value")
+        attr_values = {}
+        for key in av_data:
+            attr_values.update(
+                {key["attribute_type"]["name"]: key["attribute_value"]}
+            )
+        data.update({"specification attributes": attr_values})
+
+        return data
+
 
 class ProductSerializer(serializers.ModelSerializer):
     category = serializers.CharField(source="category.name")
     product_line = ProductlineSerializer(many=True)
+    product_type = serializers.CharField(source="product_type.name")
 
     class Meta:
         model = Product
@@ -61,5 +91,6 @@ class ProductSerializer(serializers.ModelSerializer):
             "slug",
             "description",
             "category",
+            "product_type",
             "product_line",
         )
