@@ -1,7 +1,6 @@
 from django.contrib import admin
 from django.urls import reverse
 from django.utils.safestring import mark_safe
-
 from product.models import (
     Category,
     Product,
@@ -9,6 +8,7 @@ from product.models import (
     ProductImage,
     AttributeValue,
     AttributeType,
+    ProductType
 )
 
 
@@ -16,6 +16,7 @@ from product.models import (
 class CategoryAdmin(admin.ModelAdmin):
     list_per_page = 10
     list_display = ('name', 'parent', 'slug', 'is_active')
+    raw_id_fields = ['parent']
 
 
 class EditLinkInline(object):
@@ -25,7 +26,9 @@ class EditLinkInline(object):
             args=[instance.pk],
         )
         if instance.pk:
-            link = mark_safe('<a class="button" href="{u}">Edit</a>&nbsp;'.format(u=url))
+            link = mark_safe(
+                '<a class="button" href="{u}">Edit</a>&nbsp;'.format(u=url)
+            )
             return link
         else:
             return ""
@@ -40,12 +43,28 @@ class ProductLineInline(EditLinkInline, admin.TabularInline):
 class ProductAdmin(admin.ModelAdmin):
     inlines = [ProductLineInline]
     list_per_page = 10
-    list_display = ('name', 'category', 'slug', 'is_active')
+    list_display = ('name', 'category', 'slug', 'is_active', 'product_type')
     readonly_fields = ['pid']
+    raw_id_fields = ['product_type']
 
 
 class ProductImageInline(admin.TabularInline):
     model = ProductImage
+
+
+@admin.register(ProductType)
+class ProductTypeAdmin(admin.ModelAdmin):
+    list_per_page = 10
+    list_display = ['name', 'id']
+
+
+@admin.register(AttributeType)
+class AttributeTypeAdmin(admin.ModelAdmin):
+    list_per_page = 10
+    list_display = ['name', 'description', 'product_type']
+
+
+admin.site.register(AttributeValue)
 
 
 class AttributeValueInline(admin.TabularInline):
@@ -57,7 +76,3 @@ class ProductLineAdmin(admin.ModelAdmin):
     list_per_page = 10
     list_display = ('sku', 'price', 'stock_qty', 'is_active', 'product')
     inlines = [ProductImageInline, AttributeValueInline]
-
-
-admin.site.register(AttributeType)
-admin.site.register(AttributeValue)

@@ -1,5 +1,6 @@
 from django.db import models
-
+from django.db.models import Prefetch
+from django.core.exceptions import ValidationError
 from mptt.models import MPTTModel, TreeForeignKey
 from shortuuid.django_fields import ShortUUIDField 
 
@@ -35,7 +36,9 @@ class Product(models.Model):
     is_digital = models.BooleanField(default=False)
     category = TreeForeignKey("Category", on_delete=models.PROTECT)
     is_active = models.BooleanField(default=False)
-
+    product_type = models.ForeignKey(
+        "ProductType", on_delete=models.PROTECT, related_name="product_type"
+    )
     objects = IsActiveManager()
 
     def __str__(self):
@@ -56,7 +59,6 @@ class ProductLine(models.Model):
         through="ProductlineAttributeValue",
         related_name="productline_attr_value",
     )
-
     objects = IsActiveManager()
 
     class Meta:
@@ -81,9 +83,18 @@ class ProductImage(models.Model):
         return f"{self.product_line.sku}_img"
 
 
+class ProductType(models.Model):
+    name = models.CharField(max_length=100)
+
+    def __str__(self):
+        return str(self.name)
+
+
 class AttributeType(models.Model):
     name = models.CharField(max_length=100, unique=True)
     description = models.TextField(blank=True)
+    product_type = models.ForeignKey(
+        ProductType, on_delete=models.CASCADE, related_name="product_type_attribute", default=1)
 
     def __str__(self):
         return self.name
@@ -92,23 +103,26 @@ class AttributeType(models.Model):
 class AttributeValue(models.Model):
     attribute_value = models.CharField(max_length=100)
     attribute_type = models.ForeignKey(
-        AttributeType, on_delete=models.CASCADE, related_name="attribute_type"
+        AttributeType, on_delete=models.CASCADE, related_name="attribute_type_of_producttype"
     )
 
     def __str__(self):
         return f"{self.attribute_type.name}-{self.attribute_value}"
+
+    class Meta:
+        unique_together = ("attribute_value", "attribute_type")
 
 
 class ProductlineAttributeValue(models.Model):
     attribute_value = models.ForeignKey(
         AttributeValue,
         on_delete=models.CASCADE,
-        related_name="product_value_av",
+        related_name="productline_attr_value_av",
     )
     productline = models.ForeignKey(
-        "Productline",
+        "ProductLine",
         on_delete=models.CASCADE,
-        related_name="productline_value_pl",
+        related_name="productline_attr_value_pl",
     )
 
     class Meta:
