@@ -1,14 +1,13 @@
 from django.db.models import Prefetch
-from drf_spectacular.utils import extend_schema
 from rest_framework import viewsets
-from rest_framework.response import Response
 from rest_framework import status
-
+from rest_framework.response import Response
 from rest_framework.decorators import action
+
+from drf_spectacular.utils import extend_schema
 from product.models import (
     Category,
-    Product,
-    IsActiveManager
+    Product
 )
 from .serializers import (
     CategorySerializer,
@@ -34,22 +33,27 @@ class ProductViewSet(viewsets.ViewSet):
     A simple Viewset for viewing all products
     """
 
-    queryset = Product.objects.active()
-    
+    queryset = Product.objects.active().prefetch_related(
+        Prefetch("product_line__product_image")).prefetch_related(
+        Prefetch("product_line__attribute_value__attribute_type")
+        )
+
     lookup_field = "slug"
 
     @extend_schema(responses=ProductSerializer)
     def list(self, request):
         """list all products"""
-        serializer = ProductSerializer(self.queryset, many=True)
+        serializer = ProductSerializer(
+            self.queryset,
+
+            many=True)
         return Response(serializer.data)
 
     def retrieve(self, request, slug=None):
         """list all products by slug"""
         serializer = ProductSerializer(
             self.queryset.filter(slug=slug)
-            .select_related("category")
-            .prefetch_related(Prefetch("product_line__product_image")),
+            .select_related("category"),
             many=True
         )
         return Response(serializer.data)
