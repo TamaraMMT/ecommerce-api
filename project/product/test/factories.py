@@ -1,10 +1,14 @@
 from factory.django import DjangoModelFactory
 import factory
 from product.models import (
+    AttributeType,
+    AttributeValue,
     Category,
     Product,
     ProductLine,
-    ProductImage
+    ProductImage,
+    ProductType,
+    ProductlineAttributeValue,
 )
 
 
@@ -15,6 +19,30 @@ class CategoryFactory(DjangoModelFactory):
     name = factory.Sequence(lambda n: f"test_category_{n}")
     slug = factory.Sequence(lambda n: f"test_slug_{n}")
     is_active = True
+
+
+class ProductTypeFactory(DjangoModelFactory):
+    class Meta:
+        model = ProductType
+
+    name = factory.Sequence(lambda n: f"test_product_type_{n}")
+
+
+class AttributeTypeFactory(DjangoModelFactory):
+    class Meta:
+        model = AttributeType
+
+    name = factory.Sequence(lambda n: f"test_name_attr_{n}")
+    description = factory.Sequence(lambda n: f"attr_description_{n}")
+    product_type = factory.SubFactory(ProductTypeFactory)
+
+
+class AttributeValueFactory(DjangoModelFactory):
+    class Meta:
+        model = AttributeValue
+
+    attribute_value = factory.Sequence(lambda n: f"test_name_attr_{n}")
+    attribute_type = factory.SubFactory(AttributeTypeFactory)
 
 
 class ProductFactory(DjangoModelFactory):
@@ -28,6 +56,7 @@ class ProductFactory(DjangoModelFactory):
     is_digital = False
     category = factory.SubFactory(CategoryFactory)
     is_active = True
+    product_type = factory.SubFactory(ProductTypeFactory)
 
 
 class ProductlineFactory(DjangoModelFactory):
@@ -40,6 +69,7 @@ class ProductlineFactory(DjangoModelFactory):
     product = factory.SubFactory(ProductFactory)
     is_active = True
     order = factory.Sequence(lambda n: int(n))
+    attribute_value = factory.RelatedFactory(AttributeValueFactory, 'attribute_type')
 
 
 class ProductImageFactory(DjangoModelFactory):
@@ -50,3 +80,11 @@ class ProductImageFactory(DjangoModelFactory):
     url = "test.jpg"
     product_line = factory.SubFactory(ProductlineFactory)
     order = factory.Sequence(lambda n: int(n))
+
+
+class ProductlineAttributeValueFactory(DjangoModelFactory):
+    class Meta:
+        model = ProductlineAttributeValue
+    
+    attribute_value = factory.SubFactory(AttributeValueFactory)
+    productline = factory.SubFactory(ProductlineFactory)
