@@ -5,14 +5,13 @@ from .models import (
     Product,
     ProductLine,
     ProductImage,
-    AttributeType,
-    AttributeValue,
-    ProductlineAttributeValue
+    ProductType,
+    Attribute,
+    ProductlineAttributeValue,
 )
 
 
 class CategorySerializer(serializers.ModelSerializer):
-
     class Meta:
         model = Category
         fields = ["name"]
@@ -24,36 +23,22 @@ class ProductImageSerializer(serializers.ModelSerializer):
         fields = ("alt_text", "order")
 
 
-class AttributeTypeSerializer(serializers.ModelSerializer):
+class AttributeSerializer(serializers.ModelSerializer):
     class Meta:
-        model = AttributeType
-        fields = ("name", "id")
-
-
-class AttributeValueSerializer(serializers.ModelSerializer):
-    attribute_type = AttributeTypeSerializer(many=False)
-
-    class Meta:
-        model = AttributeValue
-        fields = (
-            "attribute_type",
-            "attribute_value",
-        )
+        model = Attribute
+        fields = ("attribute_name", "product_type")
 
 
 class ProductlineAttributeValueSerializer(serializers.ModelSerializer):
-
     class Meta:
         model = ProductlineAttributeValue
-        fields = (
-            "attribute_value",
-            "productline",
-        )
+
+        fields = ("attribute_value", "productline")
 
 
 class ProductlineSerializer(serializers.ModelSerializer):
     product_image = ProductImageSerializer(many=True)
-    attribute_value = AttributeValueSerializer(many=True)
+    attributes = AttributeSerializer(many=True)
 
     class Meta:
         model = ProductLine
@@ -63,26 +48,14 @@ class ProductlineSerializer(serializers.ModelSerializer):
             "stock_qty",
             "is_active",
             "product_image",
-            "attribute_value"
+            "attributes",
         )
-
-    def to_representation(self, instance):
-        data = super().to_representation(instance)
-        av_data = data.pop("attribute_value")
-        attr_values = {}
-        for key in av_data:
-            attr_values.update(
-                {key["attribute_type"]["name"]: key["attribute_value"]}
-            )
-        data.update({"specification attributes": attr_values})
-
-        return data
 
 
 class ProductSerializer(serializers.ModelSerializer):
     category = serializers.CharField(source="category.name")
-    product_line = ProductlineSerializer(many=True)
     product_type = serializers.CharField(source="product_type.name")
+    product_line = ProductlineSerializer(many=True)
 
     class Meta:
         model = Product

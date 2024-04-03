@@ -1,14 +1,15 @@
 from django.contrib import admin
 from django.urls import reverse
+from django.db.models import Q
 from django.utils.safestring import mark_safe
 from product.models import (
     Category,
     Product,
     ProductLine,
     ProductImage,
-    AttributeValue,
-    AttributeType,
-    ProductType
+    Attribute,
+    ProductType,
+    ProductlineAttributeValue
 )
 
 
@@ -57,22 +58,18 @@ class ProductTypeAdmin(admin.ModelAdmin):
     list_per_page = 10
     list_display = ['name', 'id']
 
-
-@admin.register(AttributeType)
-class AttributeTypeAdmin(admin.ModelAdmin):
+@admin.register(Attribute)
+class AttributeAdmin(admin.ModelAdmin):
     list_per_page = 10
-    list_display = ['name', 'description', 'product_type']
+    list_display = ["attribute_name", "product_type"]
 
-
-admin.site.register(AttributeValue)
-
-
-class AttributeValueInline(admin.TabularInline):
-    model = AttributeValue.productline_attr_value.through
+class ProductlineAttributeValueInline(admin.TabularInline):
+    model = ProductlineAttributeValue
 
 
 @admin.register(ProductLine)
 class ProductLineAdmin(admin.ModelAdmin):
     list_per_page = 10
-    list_display = ('sku', 'price', 'stock_qty', 'is_active', 'product')
-    inlines = [ProductImageInline, AttributeValueInline]
+    list_display = ("sku", "price", "stock_qty", "is_active", "product")
+    inlines = [ProductImageInline, ProductlineAttributeValueInline]
+    raw_id_fields = ['attributes']
