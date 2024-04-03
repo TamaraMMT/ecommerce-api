@@ -54,10 +54,8 @@ class ProductLine(models.Model):
     )
     is_active = models.BooleanField(default=False)
     order = models.PositiveIntegerField()
-    attribute_value = models.ManyToManyField(
-        "AttributeValue",
-        through="ProductlineAttributeValue",
-        related_name="productline_attr_value",
+    attributes = models.ManyToManyField(
+        "Attribute", through="ProductlineAttributeValue", related_name="productline_attributes"
     )
     objects = IsActiveManager()
 
@@ -90,40 +88,31 @@ class ProductType(models.Model):
         return str(self.name)
 
 
-class AttributeType(models.Model):
-    name = models.CharField(max_length=100, unique=True)
-    description = models.TextField(blank=True)
+class Attribute(models.Model):
+    attribute_name = models.CharField(max_length=100)
     product_type = models.ForeignKey(
-        ProductType, on_delete=models.CASCADE, related_name="product_type_attribute", default=1)
-
-    def __str__(self):
-        return self.name
-
-
-class AttributeValue(models.Model):
-    attribute_value = models.CharField(max_length=100)
-    attribute_type = models.ForeignKey(
-        AttributeType, on_delete=models.CASCADE, related_name="attribute_type_of_producttype"
+        ProductType, on_delete=models.CASCADE, related_name="product_type_attributes"
     )
 
     def __str__(self):
-        return f"{self.attribute_type.name}-{self.attribute_value}"
+        return f"{self.attribute_name}"
 
     class Meta:
-        unique_together = ("attribute_value", "attribute_type")
+        unique_together = ("attribute_name", "product_type")
 
 
 class ProductlineAttributeValue(models.Model):
-    attribute_value = models.ForeignKey(
-        AttributeValue,
+    attribute= models.ForeignKey(
+        Attribute,
         on_delete=models.CASCADE,
-        related_name="productline_attr_value_av",
+        related_name="productline_attributes_attr",
     )
+    attribute_value = models.CharField(max_length=100)
     productline = models.ForeignKey(
-        "ProductLine",
+        ProductLine,
         on_delete=models.CASCADE,
-        related_name="productline_attr_value_pl",
+        related_name="productline_attributes_pl",
     )
 
-    class Meta:
-        unique_together = ("attribute_value", "productline")
+    def __str__(self):
+        return f"Attr:({self.attribute}{self.attribute_value})---ProductLine:{self.productline}"
