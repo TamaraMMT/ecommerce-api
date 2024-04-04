@@ -2,7 +2,7 @@ from django.db import models
 from django.db.models import Prefetch
 from django.core.exceptions import ValidationError
 from mptt.models import MPTTModel, TreeForeignKey
-from shortuuid.django_fields import ShortUUIDField 
+from shortuuid.django_fields import ShortUUIDField
 
 
 class IsActiveManager(models.Manager):
@@ -37,9 +37,13 @@ class Product(models.Model):
     category = TreeForeignKey("Category", on_delete=models.PROTECT)
     is_active = models.BooleanField(default=False)
     product_type = models.ForeignKey(
-        "ProductType", on_delete=models.PROTECT, related_name="product_type"
+        "ProductType", on_delete=models.PROTECT, related_name="product_type_product"
     )
     objects = IsActiveManager()
+
+    class Meta:
+        unique_together = ("name", "slug")
+
 
     def __str__(self):
         return self.name
@@ -95,17 +99,18 @@ class Attribute(models.Model):
     )
 
     def __str__(self):
-        return f"{self.attribute_name}"
+        return f"{self.product_type}-{self.attribute_name}"
 
     class Meta:
         unique_together = ("attribute_name", "product_type")
 
 
 class ProductlineAttributeValue(models.Model):
-    attribute= models.ForeignKey(
+    attribute = models.ForeignKey(
         Attribute,
         on_delete=models.CASCADE,
         related_name="productline_attributes_attr",
+
     )
     attribute_value = models.CharField(max_length=100)
     productline = models.ForeignKey(
@@ -114,5 +119,10 @@ class ProductlineAttributeValue(models.Model):
         related_name="productline_attributes_pl",
     )
 
+
     def __str__(self):
-        return f"Attr:({self.attribute}{self.attribute_value})---ProductLine:{self.productline}"
+        return f"{self.attribute}-{self.attribute_value}"
+
+
+    class Meta:
+        unique_together = ("attribute", "attribute_value", "productline")

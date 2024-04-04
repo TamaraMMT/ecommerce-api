@@ -5,7 +5,6 @@ from .models import (
     Product,
     ProductLine,
     ProductImage,
-    ProductType,
     Attribute,
     ProductlineAttributeValue,
 )
@@ -24,21 +23,24 @@ class ProductImageSerializer(serializers.ModelSerializer):
 
 
 class AttributeSerializer(serializers.ModelSerializer):
+    attribute_type = serializers.CharField(source="attribute_name")
+
     class Meta:
         model = Attribute
-        fields = ("attribute_name", "product_type")
+        fields = ['attribute_type']
 
 
 class ProductlineAttributeValueSerializer(serializers.ModelSerializer):
+    attribute = AttributeSerializer(read_only=True)
+
     class Meta:
         model = ProductlineAttributeValue
-
-        fields = ("attribute_value", "productline")
+        fields = ['attribute', 'attribute_value']
 
 
 class ProductlineSerializer(serializers.ModelSerializer):
     product_image = ProductImageSerializer(many=True)
-    attributes = AttributeSerializer(many=True)
+    attributes = serializers.SerializerMethodField()
 
     class Meta:
         model = ProductLine
@@ -48,8 +50,17 @@ class ProductlineSerializer(serializers.ModelSerializer):
             "stock_qty",
             "is_active",
             "product_image",
-            "attributes",
+            "attributes"
         )
+
+    def get_attributes(self, obj):
+        attributes = obj.productline_attributes_pl.prefetch_related('attribute')
+        attr_data = []
+        for attr_value in attributes:
+            attr_data.append({
+                attr_value.attribute.attribute_name: attr_value.attribute_value
+            })
+        return attr_data
 
 
 class ProductSerializer(serializers.ModelSerializer):

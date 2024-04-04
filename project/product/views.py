@@ -34,9 +34,7 @@ class ProductViewSet(viewsets.ViewSet):
     """
 
     queryset = Product.objects.active().prefetch_related(
-        Prefetch("product_line__product_image")).prefetch_related(
-        Prefetch("product_line__attribute_value__attribute_type")
-        )
+        Prefetch("product_line__product_image"))
 
     lookup_field = "slug"
 
