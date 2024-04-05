@@ -29,15 +29,19 @@ class Category(MPTTModel):
 
 class Product(models.Model):
     name = models.CharField(max_length=100)
-    slug = models.SlugField(max_length=255)
+    slug = models.SlugField(max_length=255, unique=True)
     pid = ShortUUIDField(
         unique=True, length=8, max_length=10)
     description = models.TextField(blank=True)
     is_digital = models.BooleanField(default=False)
     category = TreeForeignKey("Category", on_delete=models.PROTECT)
-    is_active = models.BooleanField(default=False)
+    is_active = models.BooleanField(default=True)
     product_type = models.ForeignKey(
         "ProductType", on_delete=models.PROTECT, related_name="product_type_product"
+    )
+    created_at = models.DateTimeField(
+        auto_now_add=True,
+        editable=False,
     )
     objects = IsActiveManager()
 
