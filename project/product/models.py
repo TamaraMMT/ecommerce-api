@@ -55,7 +55,7 @@ class Product(models.Model):
 
 class ProductLine(models.Model):
     price = models.DecimalField(decimal_places=2, max_digits=5)
-    sku = models.CharField(max_length=10)
+    sku = models.CharField(max_length=10, unique=True)
     stock_qty = models.PositiveIntegerField()
     product = models.ForeignKey(
         Product, on_delete=models.PROTECT, related_name="product_line"
