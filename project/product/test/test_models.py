@@ -2,7 +2,7 @@
 import pytest
 from django.core.exceptions import ValidationError
 from django.db.utils import IntegrityError, DataError
-
+from decimal import Decimal
 from product.models import Category, Product, ProductLine
 
 pytestmark = pytest.mark.django_db
@@ -60,6 +60,7 @@ class TestCategoryModel:
         qs = Category.objects.count()
         assert qs == 2
 
+
 class TestProductModel:
     def test_product_str_name_product(self, product_factory):
         product = product_factory(name='product1')
@@ -94,7 +95,6 @@ class TestProductModel:
         obj = product_factory(is_digital=True)
         assert obj.is_active is True
 
-
     def test_product_fk_category_on_delete_protect(self, category_factory, product_factory):
         obj1 = category_factory()
         product_factory(category=obj1)
@@ -126,29 +126,52 @@ class TestProductlineModel:
 
         assert productline.__str__() == 'test_SKU_0'
 
-    def test_unique_order_productline_per_product(
-            self,
-            product_factory,
-            productline_factory,
-
-    ):
-        product = product_factory()
-        productline_factory(product=product, order=1)
-
-        # Trying to create another Productline instance with the same order, should raise IntegrityError
-        with pytest.raises(IntegrityError):
-            productline_factory(product=product, order=1)
-
     def test_productline_max_5_digits_price(self, productline_factory):
         price = 123456
         with pytest.raises(DataError):
             productline_factory(price=price)
+
+    def test_productline_price_decimal(self, productline_factory):
+        price = Decimal("1.010")
+        productline = productline_factory(price=price)
+
+        with pytest.raises(ValidationError):
+            productline.full_clean()
+
+    def test_productline_str_sku_max_length(self, productline_factory):
+        sku = 'x' * 11
+
+        with pytest.raises(DataError):
+            productline_factory(sku=sku)
+
+    def test_unique_order_productline_per_product(
+            self,
+            product_factory,
+            productline_factory,
+    ):
+        product = product_factory()
+        productline_factory(product=product, order=1)
+
+        with pytest.raises(IntegrityError):
+            productline_factory(product=product, order=1)
 
     def test_productline_fk_product_on_delete_protect(self, product_factory, productline_factory):
         product1 = product_factory()
         productline_factory(product=product1)
         with pytest.raises(IntegrityError):
             product1.delete()
+
+    def test_productline_return_active_only_true(self, productline_factory):
+        productline_factory(is_active=True, sku="sku_test1")
+        productline_factory(is_active=False, sku="sku_test2")
+        qs = ProductLine.objects.active().count()
+        assert qs == 1
+
+    def test_productline_return_active_only_false(self, productline_factory):
+        productline_factory(is_active=True, sku="sku_test1")
+        productline_factory(is_active=False, sku="sku_test2")
+        qs = ProductLine.objects.count()
+        assert qs == 2
 
 
 class TestProductImageModel:
@@ -178,21 +201,20 @@ class TestAttributeTypeModel:
 
 
 class TestProductlineAttributeValueModel:
-    def test_unique_together(
+    def test_productline_attributes_unique_together(
             self,
             product_type_factory,
             product_factory,
             attribute_factory,
             productline_factory,
             productline_attribute_value_factory,
-
-
     ):
+
         # Create instances of ProductType, Attribute, Product and ProductLine
         product_type = product_type_factory()
         attr_type = attribute_factory(attribute_name="test_attribute", product_type=product_type)
         product = product_factory()
-        productline = productline_factory(product=product)
+        productline = productline_factory(product=product, sku="123")
 
         # Create instances of ProductlineAttributeValue
         productline_attribute_value_factory(
