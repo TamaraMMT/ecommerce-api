@@ -58,10 +58,12 @@ class ProductTypeAdmin(admin.ModelAdmin):
     list_per_page = 10
     list_display = ['name', 'id']
 
+
 @admin.register(Attribute)
 class AttributeAdmin(admin.ModelAdmin):
     list_per_page = 10
     list_display = ["attribute_name", "product_type"]
+
 
 class ProductlineAttributeValueInline(admin.TabularInline):
     model = ProductlineAttributeValue
@@ -72,4 +74,5 @@ class ProductLineAdmin(admin.ModelAdmin):
     list_per_page = 10
     list_display = ("sku", "price", "stock_qty", "is_active", "product")
     inlines = [ProductImageInline, ProductlineAttributeValueInline]
-    raw_id_fields = ['attributes']
+    readonly_fields = ['product', 'order']
+
