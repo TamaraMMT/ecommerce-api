@@ -1,8 +1,18 @@
+import os
+import uuid
+from django.conf import settings
 from django.db import models
-from django.db.models import Prefetch
-from django.core.exceptions import ValidationError
 from mptt.models import MPTTModel, TreeForeignKey
 from shortuuid.django_fields import ShortUUIDField
+
+
+def productimage_image_file_path(instance, filename):
+    """Generate file path for new productimage image."""
+    ext = os.path.splitext(filename)[1]
+    filename = f'{uuid.uuid4()}{ext}'
+
+    return os.path.join('uploads', 'productimage', filename)
+
 
 
 class IsActiveManager(models.Manager):
@@ -48,7 +58,6 @@ class Product(models.Model):
     class Meta:
         unique_together = ("name", "slug")
 
-
     def __str__(self):
         return self.name
 
@@ -75,18 +84,18 @@ class ProductLine(models.Model):
 
 
 class ProductImage(models.Model):
-    alt_text = models.CharField(max_length=100)
-    url = models.ImageField(upload_to=None, default="test.jpg")
+    alt_text = models.CharField(max_length=100, null=False)
+    url = models.ImageField(null=True, upload_to=productimage_image_file_path)
     product_line = models.ForeignKey(
         ProductLine, on_delete=models.CASCADE, related_name="product_image"
     )
-    order = models.PositiveIntegerField(blank=True)
+    order = models.PositiveIntegerField(null=False)
 
     class Meta:
         unique_together = ("product_line", "order")
 
     def __str__(self):
-        return f"{self.product_line.sku}_img"
+        return str(self.alt_text)
 
 
 class ProductType(models.Model):

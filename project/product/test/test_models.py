@@ -86,7 +86,6 @@ class TestProductModel:
         with pytest.raises(IntegrityError):
             product_factory(pid="u4s5d6f")
 
-
     def test_product_is_digital_false_default(self, product_factory):
         obj = product_factory(is_digital=False)
         assert obj.is_digital is False
@@ -162,14 +161,14 @@ class TestProductlineModel:
             product1.delete()
 
     def test_productline_return_active_only_true(self, productline_factory):
-        productline_factory(is_active=True, sku="sku_test1")
-        productline_factory(is_active=False, sku="sku_test2")
+        productline_factory(is_active=True)
+        productline_factory(is_active=False)
         qs = ProductLine.objects.active().count()
         assert qs == 1
 
     def test_productline_return_active_only_false(self, productline_factory):
-        productline_factory(is_active=True, sku="sku_test1")
-        productline_factory(is_active=False, sku="sku_test2")
+        productline_factory(is_active=True)
+        productline_factory(is_active=False)
         qs = ProductLine.objects.count()
         assert qs == 2
 
@@ -177,13 +176,47 @@ class TestProductlineModel:
 class TestProductImageModel:
     def test_str_image_productline(
         self,
+        product_image_factory,
         productline_factory,
+    ):
+
+        productline = productline_factory()
+        image = product_image_factory(
+            product_line=productline,
+            alt_text="alt_img_test"
+        )
+
+        assert image.__str__() == 'alt_img_test'
+
+    def test_unique_order_productline_per_order(
+            self,
+            product_image_factory,
+            productline_factory
+    ):
+
+        productline = productline_factory()
+
+        product_image_factory(product_line=productline, order=1)
+
+        with pytest.raises(IntegrityError):
+            product_image_factory(product_line=productline, order=1)
+
+    def test_alt_text_max_length(self, product_image_factory):
+        alt_text = "x" * 111
+        with pytest.raises(DataError):
+            product_image_factory(alt_text=alt_text)
+
+    def test_alt_text_cannot_be_null_if_image_exist(
+        self,
         product_image_factory,
     ):
-        productline = productline_factory(sku="sku_test")
-        image = product_image_factory(order=1, product_line=productline)
+        with pytest.raises(IntegrityError):
+            product_image_factory(alt_text=None)
 
-        assert image.__str__() == 'sku_test_img'
+    def test_order_cannot_be_null_if_image_exist(self, product_image_factory):
+
+        with pytest.raises(IntegrityError):
+            product_image_factory(order=None)
 
 
 class TestProductTypeModel:

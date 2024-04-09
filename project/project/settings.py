@@ -28,6 +28,7 @@ SECRET_KEY = os.environ.get('SECRET_KEY', 'INSECURE')
 DEBUG = True
 
 ALLOWED_HOSTS = []
+HOST = 'http://127.0.0.1:8000/'
 
 
 # Application definition
@@ -132,7 +133,15 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.2/howto/static-files/
 
-STATIC_URL = '/static/'
+STATIC_URL = '/static/static/'
+
+MEDIA_URL = '/static/media/'
+
+MEDIA_ROOT = '/vol/web/media'
+
+STATIC_ROOT = '/vol/web/static'
+
+
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/3.2/ref/settings/#default-auto-field

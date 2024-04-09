@@ -55,7 +55,7 @@ class ProductlineFactory(DjangoModelFactory):
         model = ProductLine
 
     price = factory.Sequence(lambda n:  f"{n:02d}")
-    sku = factory.Sequence(lambda n: f"test_SKU_{n}")
+    sku = factory.Sequence(lambda n: f"SKU_{n}")
     stock_qty = factory.Sequence(lambda n: f"0000_{n}")
     product = factory.SubFactory(ProductFactory)
     is_active = True
@@ -67,9 +67,9 @@ class ProductImageFactory(DjangoModelFactory):
     class Meta:
         model = ProductImage
 
-    alt_text = "test alternative text"
-    url = "test.jpg"
-    product_line = factory.SubFactory(ProductlineFactory)
+    alt_text = factory.Sequence(lambda n: f"test alternative text {n}")
+    url = factory.LazyAttribute(lambda o: f"{o.alt_text}.jpg")
+    productline = factory.RelatedFactory(ProductlineFactory)
     order = factory.Sequence(lambda n: int(n))
 
 

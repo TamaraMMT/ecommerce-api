@@ -10,6 +10,7 @@ services:
       - "8000:8000"
     volumes:
       - ./project:/project
+      - media-db-dev:/vol/web
     command: >
       sh -c "python manage.py makemigrations &&
             python manage.py migrate &&
@@ -40,3 +41,4 @@ services:
 
 volumes:
   data-db-dev:
+  media-db-dev:
