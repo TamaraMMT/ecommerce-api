@@ -1,5 +1,5 @@
-
 import pytest
+import uuid
 from django.core.exceptions import ValidationError
 from django.db.utils import IntegrityError, DataError
 from decimal import Decimal
@@ -188,6 +188,24 @@ class TestProductImageModel:
 
         assert image.__str__() == 'alt_img_test'
 
+    def test_uuid_url_image_productline(
+        self,
+        product_image_factory,
+        productline_factory,
+    ):
+
+        productline = productline_factory()
+        ext = '.png'
+        uuidtest = (f'{uuid.uuid4()}{ext}')
+        image = product_image_factory.create(
+            product_line=productline,
+            url=uuidtest
+        )
+        image.save()
+        filename = image.url
+
+        assert filename == uuidtest
+
     def test_unique_order_productline_per_order(
             self,
             product_image_factory,
@@ -211,12 +229,12 @@ class TestProductImageModel:
         product_image_factory,
     ):
         with pytest.raises(IntegrityError):
-            product_image_factory(alt_text=None)
+            product_image_factory(alt_text=False)
 
     def test_order_cannot_be_null_if_image_exist(self, product_image_factory):
 
         with pytest.raises(IntegrityError):
-            product_image_factory(order=None)
+            product_image_factory(order=False)
 
 
 class TestProductTypeModel:
