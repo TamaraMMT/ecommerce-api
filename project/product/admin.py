@@ -1,5 +1,6 @@
 from django.contrib import admin
 from django.urls import reverse
+
 from django.db.models import Q
 from django.utils.safestring import mark_safe
 from product.models import (
@@ -76,3 +77,19 @@ class ProductLineAdmin(admin.ModelAdmin):
     inlines = [ProductImageInline, ProductlineAttributeValueInline]
     readonly_fields = ['product', 'order']
 
+
+class ProductlineAttributeValueAdmin(admin.ModelAdmin):
+    """
+    Admin configuration for ProductlineAttributeValue model.
+    """
+    readonly_fields = ("attribute", "attribute_value", "productline")
+    list_display = ("attribute", "attribute_value", "productline")
+
+    def has_add_permission(self, request):
+        """
+        Disallow adding ProductlineAttributeValue objects directly through the admin.
+        """
+        return False
+
+
+admin.site.register(ProductlineAttributeValue, ProductlineAttributeValueAdmin)

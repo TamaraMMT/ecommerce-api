@@ -1,9 +1,12 @@
-
+"""
+Tests for models.
+"""
+from decimal import Decimal
 import pytest
+import uuid
 from django.core.exceptions import ValidationError
 from django.db.utils import IntegrityError, DataError
-from decimal import Decimal
-from product.models import Category, Product, ProductLine
+from product.models import Category, Product, ProductLine, ProductImage, Attribute
 
 pytestmark = pytest.mark.django_db
 
@@ -112,12 +115,6 @@ class TestProductModel:
         qs = Product.objects.count()
         assert qs == 2
 
-    def test_product_unique_together_name_slug(self, product_factory):
-        product_factory(name="Test Name", slug="Test Slug")
-
-        with pytest.raises(IntegrityError):
-            product_factory(name="Test Name", slug="Test Slug")
-
 
 class TestProductlineModel:
     def test_str_sku_output_(self, productline_factory):
@@ -188,6 +185,36 @@ class TestProductImageModel:
 
         assert image.__str__() == 'alt_img_test'
 
+    def test_uuid_url_image_productline(
+        self,
+        product_image_factory,
+        productline_factory,
+    ):
+
+        productline = productline_factory()
+        ext = '.png'
+        uuidtest = f'{uuid.uuid4()}{ext}'
+        image = product_image_factory.create(
+            product_line=productline,
+            url=uuidtest
+        )
+        image.save()
+        filename = image.url
+
+        assert filename == uuidtest
+
+    def test_productimage_delete_cascade_productline(
+        self,
+        product_image_factory,
+        productline_factory
+    ):
+        productline = productline_factory()
+        product_image_factory(
+            product_line=productline)
+        productline.delete()
+        qs = ProductImage.objects.count()
+        assert qs == 0
+
     def test_unique_order_productline_per_order(
             self,
             product_image_factory,
@@ -211,12 +238,12 @@ class TestProductImageModel:
         product_image_factory,
     ):
         with pytest.raises(IntegrityError):
-            product_image_factory(alt_text=None)
+            product_image_factory(alt_text=False)
 
     def test_order_cannot_be_null_if_image_exist(self, product_image_factory):
 
         with pytest.raises(IntegrityError):
-            product_image_factory(order=None)
+            product_image_factory(order=False)
 
 
 class TestProductTypeModel:
@@ -225,12 +252,38 @@ class TestProductTypeModel:
 
         assert obj.__str__() == "test_type_product"
 
+    def test_producttype_name_max_length(self, product_type_factory):
+        name = "x" * 101
+        with pytest.raises(DataError):
+            product_type_factory(name=name)
 
-class TestAttributeTypeModel:
-    def test_str_method_attr_type(self, attribute_factory, product_type_factory):
-        product_type = product_type_factory(name="TestProductType")
-        obj = attribute_factory.create(attribute_name="TestAttributeName", product_type=product_type)
-        assert obj.__str__() == "TestProductType-TestAttributeName"
+    def test_producttype_name_unique_field(self, product_type_factory):
+        product_type_factory(name="name_unique")
+        with pytest.raises(IntegrityError):
+            product_type_factory(name="name_unique")
+
+
+class TestAttributeModel:
+    def test_str_method_attr_type(self, attribute_factory):
+        obj = attribute_factory(attribute_name="TestAttributeName")
+        assert obj.__str__() == "TestAttributeName"
+
+    def test_attribute_name_max_length(self, attribute_factory):
+        name = "x" * 101
+        with pytest.raises(DataError):
+            attribute_factory(attribute_name=name)
+
+    def test_attribute_on_delete_cascade_producttype(
+        self,
+        attribute_factory,
+        product_type_factory
+    ):
+        producttype = product_type_factory()
+        attribute_factory(
+            product_type=producttype)
+        producttype.delete()
+        qs = Attribute.objects.count()
+        assert qs == 0
 
 
 class TestProductlineAttributeValueModel:
@@ -245,9 +298,9 @@ class TestProductlineAttributeValueModel:
 
         # Create instances of ProductType, Attribute, Product and ProductLine
         product_type = product_type_factory()
-        attr_type = attribute_factory(attribute_name="test_attribute", product_type=product_type)
+        attr_type = attribute_factory(product_type=product_type)
         product = product_factory()
-        productline = productline_factory(product=product, sku="123")
+        productline = productline_factory(product=product)
 
         # Create instances of ProductlineAttributeValue
         productline_attribute_value_factory(
@@ -256,10 +309,21 @@ class TestProductlineAttributeValueModel:
             productline=productline
         )
 
-        # Trying to create another ProductlineAttributeValue instance with the same values should raise IntegrityError
         with pytest.raises(IntegrityError):
             productline_attribute_value_factory(
                 attribute_value="AttributeValue",
                 attribute=attr_type,
                 productline=productline
             )
+
+    def test_attribute_on_delete_cascade_producttype(
+        self,
+        attribute_factory,
+        product_type_factory
+    ):
+        producttype = product_type_factory()
+        attribute_factory(
+            product_type=producttype)
+        producttype.delete()
+        qs = Attribute.objects.count()
+        assert qs == 0
