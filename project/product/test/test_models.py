@@ -1,9 +1,12 @@
+"""
+Tests for models.
+"""
+from decimal import Decimal
 import pytest
 import uuid
 from django.core.exceptions import ValidationError
 from django.db.utils import IntegrityError, DataError
-from decimal import Decimal
-from product.models import Category, Product, ProductLine
+from product.models import Category, Product, ProductLine, ProductImage, Attribute
 
 pytestmark = pytest.mark.django_db
 
@@ -295,9 +298,9 @@ class TestProductlineAttributeValueModel:
 
         # Create instances of ProductType, Attribute, Product and ProductLine
         product_type = product_type_factory()
-        attr_type = attribute_factory(attribute_name="test_attribute", product_type=product_type)
+        attr_type = attribute_factory(product_type=product_type)
         product = product_factory()
-        productline = productline_factory(product=product, sku="123")
+        productline = productline_factory(product=product)
 
         # Create instances of ProductlineAttributeValue
         productline_attribute_value_factory(
@@ -306,10 +309,21 @@ class TestProductlineAttributeValueModel:
             productline=productline
         )
 
-        # Trying to create another ProductlineAttributeValue instance with the same values should raise IntegrityError
         with pytest.raises(IntegrityError):
             productline_attribute_value_factory(
                 attribute_value="AttributeValue",
                 attribute=attr_type,
                 productline=productline
             )
+
+    def test_attribute_on_delete_cascade_producttype(
+        self,
+        attribute_factory,
+        product_type_factory
+    ):
+        producttype = product_type_factory()
+        attribute_factory(
+            product_type=producttype)
+        producttype.delete()
+        qs = Attribute.objects.count()
+        assert qs == 0
