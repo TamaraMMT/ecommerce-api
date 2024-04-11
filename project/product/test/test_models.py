@@ -249,12 +249,38 @@ class TestProductTypeModel:
 
         assert obj.__str__() == "test_type_product"
 
+    def test_producttype_name_max_length(self, product_type_factory):
+        name = "x" * 101
+        with pytest.raises(DataError):
+            product_type_factory(name=name)
 
-class TestAttributeTypeModel:
-    def test_str_method_attr_type(self, attribute_factory, product_type_factory):
-        product_type = product_type_factory(name="TestProductType")
-        obj = attribute_factory.create(attribute_name="TestAttributeName", product_type=product_type)
-        assert obj.__str__() == "TestProductType-TestAttributeName"
+    def test_producttype_name_unique_field(self, product_type_factory):
+        product_type_factory(name="name_unique")
+        with pytest.raises(IntegrityError):
+            product_type_factory(name="name_unique")
+
+
+class TestAttributeModel:
+    def test_str_method_attr_type(self, attribute_factory):
+        obj = attribute_factory(attribute_name="TestAttributeName")
+        assert obj.__str__() == "TestAttributeName"
+
+    def test_attribute_name_max_length(self, attribute_factory):
+        name = "x" * 101
+        with pytest.raises(DataError):
+            attribute_factory(attribute_name=name)
+
+    def test_attribute_on_delete_cascade_producttype(
+        self,
+        attribute_factory,
+        product_type_factory
+    ):
+        producttype = product_type_factory()
+        attribute_factory(
+            product_type=producttype)
+        producttype.delete()
+        qs = Attribute.objects.count()
+        assert qs == 0
 
 
 class TestProductlineAttributeValueModel:
