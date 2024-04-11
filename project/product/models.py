@@ -127,7 +127,7 @@ class ProductType(models.Model):
 
 class Attribute(models.Model):
     """
-    Represents an attribute associated with a product type, 
+    Represents an attribute associated with a product type,
     such as size, color, or material.
     """
     attribute_name = models.CharField(max_length=100)
@@ -138,7 +138,7 @@ class Attribute(models.Model):
     )
 
     def __str__(self):
-        return f"{self.product_type}-{self.attribute_name}"
+        return f"{self.attribute_name}"
 
     class Meta:
         unique_together = ("attribute_name", "product_type")
