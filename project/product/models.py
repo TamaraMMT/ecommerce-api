@@ -1,21 +1,41 @@
+"""
+Database models
+"""
 import os
 import uuid
-from django.conf import settings
 from django.db import models
 from mptt.models import MPTTModel, TreeForeignKey
 from shortuuid.django_fields import ShortUUIDField
 
 
 def productimage_image_file_path(instance, filename):
-    """Generate file path for new productimage image."""
+    """
+    Generates a file path for a new productimage image.
+
+    Args:
+        instance: The ProductImage model instance.
+        filename: The original filename of the uploaded image.
+
+    Returns:
+        A string representing the file path where the image will be saved.
+    """
     ext = os.path.splitext(filename)[1]
     filename = f'{uuid.uuid4()}{ext}'
 
     return os.path.join('uploads', 'productimage', filename)
 
 
-
 class IsActiveManager(models.Manager):
+    """
+    Manager class that filters the objects to only include active ones (is_active=True).
+
+    Provides a method to easily retrieve active objects:
+
+    ```python
+    objects = IsActiveManager()
+    ```
+    """
+
     def active(self):
         return self.get_queryset().filter(is_active=True)
 
@@ -24,17 +44,16 @@ class Category(MPTTModel):
     name = models.CharField(max_length=235, unique=True)
     slug = models.SlugField(max_length=255, unique=True)
     parent = TreeForeignKey(
-        "self", on_delete=models.PROTECT, null=True, blank=True
-    )
+        "self", on_delete=models.PROTECT, null=True, blank=True)
     is_active = models.BooleanField(default=True)
-
     objects = IsActiveManager()
 
     class MPTTMeta:
+        """Sorting order when inserting new child categories"""
         order_insertion_by = ["name"]
 
     def __str__(self):
-        return self.name
+        return str(self.name)
 
 
 class Product(models.Model):
@@ -47,7 +66,9 @@ class Product(models.Model):
     category = TreeForeignKey("Category", on_delete=models.PROTECT)
     is_active = models.BooleanField(default=True)
     product_type = models.ForeignKey(
-        "ProductType", on_delete=models.PROTECT, related_name="product_type_product"
+        "ProductType",
+        on_delete=models.PROTECT,
+        related_name="product_type_product"
     )
     created_at = models.DateTimeField(
         auto_now_add=True,
@@ -59,7 +80,7 @@ class Product(models.Model):
         unique_together = ("name", "slug")
 
     def __str__(self):
-        return self.name
+        return str(self.name)
 
 
 class ProductLine(models.Model):
@@ -72,7 +93,9 @@ class ProductLine(models.Model):
     is_active = models.BooleanField(default=False)
     order = models.PositiveIntegerField()
     attributes = models.ManyToManyField(
-        "Attribute", through="ProductlineAttributeValue", related_name="productline_attributes"
+        "Attribute",
+        through="ProductlineAttributeValue",
+        related_name="productline_attributes"
     )
     objects = IsActiveManager()
 
@@ -106,9 +129,15 @@ class ProductType(models.Model):
 
 
 class Attribute(models.Model):
+    """
+    Represents an attribute associated with a product type, 
+    such as size, color, or material.
+    """
     attribute_name = models.CharField(max_length=100)
     product_type = models.ForeignKey(
-        ProductType, on_delete=models.CASCADE, related_name="product_type_attributes"
+        ProductType,
+        on_delete=models.CASCADE,
+        related_name="product_type_attributes"
     )
 
     def __str__(self):
@@ -119,6 +148,9 @@ class Attribute(models.Model):
 
 
 class ProductlineAttributeValue(models.Model):
+    """
+    Represents the specific value of an attribute for a particular product line.
+    """
     attribute = models.ForeignKey(
         Attribute,
         on_delete=models.CASCADE,
@@ -132,10 +164,8 @@ class ProductlineAttributeValue(models.Model):
         related_name="productline_attributes_pl",
     )
 
-
     def __str__(self):
         return f"{self.attribute}-{self.attribute_value}"
-
 
     class Meta:
         unique_together = ("attribute", "attribute_value", "productline")

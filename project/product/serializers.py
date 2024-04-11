@@ -1,3 +1,7 @@
+"""
+Serializer for products APIs
+"""
+
 from rest_framework import serializers
 
 
@@ -12,18 +16,23 @@ from .models import (
 
 
 class CategorySerializer(serializers.ModelSerializer):
+    """Serializer for Categories"""
+
     class Meta:
         model = Category
         fields = ["name"]
 
 
 class ProductImageSerializer(serializers.ModelSerializer):
+    """Serializer for Product Images"""
+
     class Meta:
         model = ProductImage
         fields = ("alt_text", "order", "url")
 
 
 class AttributeSerializer(serializers.ModelSerializer):
+    """Serializer for Attributes"""
     attribute_type = serializers.CharField(source="attribute_name")
 
     class Meta:
@@ -32,6 +41,7 @@ class AttributeSerializer(serializers.ModelSerializer):
 
 
 class ProductlineAttributeValueSerializer(serializers.ModelSerializer):
+    """Serializer for Productline Attribute Values"""
     attribute = AttributeSerializer(read_only=True)
 
     class Meta:
@@ -40,6 +50,7 @@ class ProductlineAttributeValueSerializer(serializers.ModelSerializer):
 
 
 class ProductlineSerializer(serializers.ModelSerializer):
+    """Serializer for Product Lines"""
     product_image = ProductImageSerializer(many=True)
     attributes = serializers.SerializerMethodField()
 
@@ -55,7 +66,8 @@ class ProductlineSerializer(serializers.ModelSerializer):
         )
 
     def get_attributes(self, obj):
-        attributes = obj.productline_attributes_pl.prefetch_related('attribute')
+        attributes = obj.productline_attributes_pl.prefetch_related(
+            'attribute')
         attr_data = []
         for attr_value in attributes:
             attr_data.append({
@@ -65,6 +77,7 @@ class ProductlineSerializer(serializers.ModelSerializer):
 
 
 class ProductSerializer(serializers.ModelSerializer):
+    """Serializer for Products"""
     category = serializers.CharField(source="category.name")
     product_type = serializers.CharField(source="product_type.name")
     product_line = ProductlineSerializer(many=True)
