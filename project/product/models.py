@@ -119,7 +119,7 @@ class ProductImage(models.Model):
 
 
 class ProductType(models.Model):
-    name = models.CharField(max_length=100)
+    name = models.CharField(max_length=100, unique=True)
 
     def __str__(self):
         return str(self.name)
