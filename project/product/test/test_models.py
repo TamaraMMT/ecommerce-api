@@ -196,7 +196,7 @@ class TestProductImageModel:
 
         productline = productline_factory()
         ext = '.png'
-        uuidtest = (f'{uuid.uuid4()}{ext}')
+        uuidtest = f'{uuid.uuid4()}{ext}'
         image = product_image_factory.create(
             product_line=productline,
             url=uuidtest
@@ -205,6 +205,18 @@ class TestProductImageModel:
         filename = image.url
 
         assert filename == uuidtest
+
+    def test_productimage_delete_cascade_productline(
+        self,
+        product_image_factory,
+        productline_factory
+    ):
+        productline = productline_factory()
+        product_image_factory(
+            product_line=productline)
+        productline.delete()
+        qs = ProductImage.objects.count()
+        assert qs == 0
 
     def test_unique_order_productline_per_order(
             self,
