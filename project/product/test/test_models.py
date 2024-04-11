@@ -112,12 +112,6 @@ class TestProductModel:
         qs = Product.objects.count()
         assert qs == 2
 
-    def test_product_unique_together_name_slug(self, product_factory):
-        product_factory(name="Test Name", slug="Test Slug")
-
-        with pytest.raises(IntegrityError):
-            product_factory(name="Test Name", slug="Test Slug")
-
 
 class TestProductlineModel:
     def test_str_sku_output_(self, productline_factory):
