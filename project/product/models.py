@@ -76,9 +76,6 @@ class Product(models.Model):
     )
     objects = IsActiveManager()
 
-    class Meta:
-        unique_together = ("name", "slug")
-
     def __str__(self):
         return str(self.name)
 
