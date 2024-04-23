@@ -15,8 +15,16 @@ Custom Django command to import data from a CSV file into a specified model.
 
     **Example usage:**
 
+    using docker: copy in volume 
+     docker cp path/file/morecategoryes.csv ecommerce_project_1:/vol/web/moreproductype.csv
+
     ```bash
-    python manage.py importdata products.csv Product
+    python manage.py importdata moreproductype.csv ProductType
+
+    import with docker
+    docker-compose run --rm project sh -c "python manage.py importdata /vol/web/moreproductype.csv ProductType"
+
+
 """
 
 
