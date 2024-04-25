@@ -1,8 +1,8 @@
 from django.contrib import admin
 from django.urls import reverse
-
-from django.db.models import Q
 from django.utils.safestring import mark_safe
+from import_export.admin import ImportExportModelAdmin
+from import_export import resources
 from product.models import (
     Category,
     Product,
@@ -12,6 +12,12 @@ from product.models import (
     ProductType,
     ProductlineAttributeValue
 )
+
+
+class ProductLineResource(resources.ModelResource):
+
+    class Meta:
+        model = ProductLine
 
 
 @admin.register(Category)
@@ -71,7 +77,8 @@ class ProductlineAttributeValueInline(admin.TabularInline):
 
 
 @admin.register(ProductLine)
-class ProductLineAdmin(admin.ModelAdmin):
+class ProductLineAdmin(ImportExportModelAdmin, admin.ModelAdmin):
+    resource_classes = [ProductLineResource]
     list_per_page = 10
     list_display = ("sku", "price", "stock_qty", "is_active", "product")
     inlines = [ProductImageInline, ProductlineAttributeValueInline]
