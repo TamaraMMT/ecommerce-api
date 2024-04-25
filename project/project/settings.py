@@ -10,6 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/3.2/ref/settings/
 """
 
+from import_export.formats.base_formats import CSV, XLSX
 import os
 from pathlib import Path
 
@@ -48,6 +49,7 @@ INSTALLED_APPS = [
     'product',
     'mptt',
     'debug_toolbar',
+    'import_export',
 ]
 
 MIDDLEWARE = [
@@ -142,7 +144,6 @@ MEDIA_ROOT = '/vol/web/media'
 STATIC_ROOT = '/vol/web/static'
 
 
-
 # Default primary key field type
 # https://docs.djangoproject.com/en/3.2/ref/settings/#default-auto-field
 
@@ -168,3 +169,8 @@ INTERNAL_IPS = ('127.0.0.1', 'localhost')
 DEBUG_TOOLBAR_CONFIG = {
     "SHOW_TOOLBAR_CALLBACK": lambda request: True,
 }
+
+
+# import Export Datas
+
+IMPORT_FORMATS = [CSV, XLSX]
