@@ -10,7 +10,7 @@ from product.models import (
     ProductImage,
     Attribute,
     ProductType,
-    ProductlineAttributeValue
+    ProductAttributeValue
 )
 
 
@@ -63,7 +63,7 @@ class ProductImageInline(admin.TabularInline):
 @admin.register(ProductType)
 class ProductTypeAdmin(admin.ModelAdmin):
     list_per_page = 10
-    list_display = ['name', 'id']
+    list_display = ['name']
 
 
 @admin.register(Attribute)
@@ -72,8 +72,8 @@ class AttributeAdmin(admin.ModelAdmin):
     list_display = ["attribute_name", "product_type"]
 
 
-class ProductlineAttributeValueInline(admin.TabularInline):
-    model = ProductlineAttributeValue
+class ProductAttributeValueInline(admin.TabularInline):
+    model = ProductAttributeValue
 
 
 @admin.register(ProductLine)
@@ -81,16 +81,19 @@ class ProductLineAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     resource_classes = [ProductLineResource]
     list_per_page = 10
     list_display = ("sku", "price", "stock_qty", "is_active", "product")
-    inlines = [ProductImageInline, ProductlineAttributeValueInline]
+    inlines = [ProductImageInline, ProductAttributeValueInline]
     readonly_fields = ['product', 'order']
 
+    def has_add_permission(self, request):
+        return False
 
-class ProductlineAttributeValueAdmin(admin.ModelAdmin):
+
+class ProductAttributeValueAdmin(admin.ModelAdmin):
     """
     Admin configuration for ProductlineAttributeValue model.
     """
-    readonly_fields = ("attribute", "attribute_value", "productline")
-    list_display = ("attribute", "attribute_value", "productline")
+    list_display = ("value", "attribute", "product_line", )
+    readonly_fields = ("attribute", "value", "product_line")
 
     def has_add_permission(self, request):
         """
@@ -99,4 +102,4 @@ class ProductlineAttributeValueAdmin(admin.ModelAdmin):
         return False
 
 
-admin.site.register(ProductlineAttributeValue, ProductlineAttributeValueAdmin)
+admin.site.register(ProductAttributeValue, ProductAttributeValueAdmin)

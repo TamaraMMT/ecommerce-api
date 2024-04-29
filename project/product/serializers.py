@@ -10,8 +10,7 @@ from .models import (
     Product,
     ProductLine,
     ProductImage,
-    Attribute,
-    ProductlineAttributeValue,
+    ProductAttributeValue,
 )
 
 
@@ -31,28 +30,20 @@ class ProductImageSerializer(serializers.ModelSerializer):
         fields = ("alt_text", "order", "url")
 
 
-class AttributeSerializer(serializers.ModelSerializer):
-    """Serializer for Attributes"""
-    attribute_type = serializers.CharField(source="attribute_name")
+class ProductAttributeValueSerializer(serializers.ModelSerializer):
+    """Serializer for Product Attribute Values"""
+    attribute_name = serializers.CharField(
+        source='attribute.attribute_name', read_only=True)
 
     class Meta:
-        model = Attribute
-        fields = ['attribute_type']
-
-
-class ProductlineAttributeValueSerializer(serializers.ModelSerializer):
-    """Serializer for Productline Attribute Values"""
-    attribute = AttributeSerializer(read_only=True)
-
-    class Meta:
-        model = ProductlineAttributeValue
-        fields = ['attribute', 'attribute_value']
+        model = ProductAttributeValue
+        fields = ['attribute_name', 'value']
 
 
 class ProductlineSerializer(serializers.ModelSerializer):
     """Serializer for Product Lines"""
     product_image = ProductImageSerializer(many=True)
-    attributes = serializers.SerializerMethodField()
+    product_line_attributes = ProductAttributeValueSerializer(many=True)
 
     class Meta:
         model = ProductLine
@@ -62,18 +53,8 @@ class ProductlineSerializer(serializers.ModelSerializer):
             "stock_qty",
             "is_active",
             "product_image",
-            "attributes"
+            "product_line_attributes"
         )
-
-    def get_attributes(self, obj):
-        attributes = obj.productline_attributes_pl.prefetch_related(
-            'attribute')
-        attr_data = []
-        for attr_value in attributes:
-            attr_data.append({
-                attr_value.attribute.attribute_name: attr_value.attribute_value
-            })
-        return attr_data
 
 
 class ProductSerializer(serializers.ModelSerializer):
