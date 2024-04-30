@@ -7,7 +7,7 @@ os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'project.settings')
 app = Celery('project')
 
 
-app = Celery('project', broker='redis://localhost:6379/0')
+app = Celery('project', broker='redis://redis:6379')
 
 
 app.config_from_object('django.conf:settings', namespace='CELERY')
