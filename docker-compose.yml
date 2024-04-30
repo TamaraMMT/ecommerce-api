@@ -47,6 +47,18 @@ services:
     ports:
       - "6379:6379"
 
+  celery-worker:
+    build: .
+    command: celery -A project worker --loglevel=info
+    depends_on:
+      - project
+      - redis
+    volumes:
+      - ./project:/project:ro
+    environment:
+      - CELERY_BROKER_URL=redis://redis:6379
+      - CELERY_RESULT_BACKEND=redis://redis:6379
+
 volumes:
   data-db-dev:
   media-db-dev:
