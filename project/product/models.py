@@ -152,4 +152,4 @@ class ProductAttributeValue(models.Model):
         return f"{self.attribute.attribute_name} - {self.value}"
 
     class Meta:
-        unique_together = ("attribute", "product_line")
+        unique_together = ("attribute", "product_line", "value")
