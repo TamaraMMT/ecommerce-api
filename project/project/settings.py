@@ -10,10 +10,13 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/3.2/ref/settings/
 """
 
+from datetime import timedelta
 from import_export.formats.base_formats import CSV, XLSX
 import os
+from dotenv import load_dotenv
 from pathlib import Path
 
+load_dotenv()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -29,8 +32,12 @@ SECRET_KEY = os.environ.get('SECRET_KEY', 'INSECURE')
 DEBUG = True
 
 ALLOWED_HOSTS = []
-HOST = 'http://127.0.0.1:8000/'
-
+ALLOWED_HOSTS.extend(
+    filter(
+        None,
+        os.environ.get('ALLOWED_HOSTS', '').split(','),
+    )
+)
 
 # Application definition
 
@@ -41,15 +48,18 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    #
     'rest_framework',
     'drf_spectacular',
-    'rest_framework.authtoken',
-    'core',
-    'user',
-    'product',
+    'rest_framework_simplejwt',
     'mptt',
     'debug_toolbar',
     'import_export',
+    # apps
+    'core',
+    'user',
+    'product',
+    'order',
 ]
 
 MIDDLEWARE = [
@@ -135,13 +145,13 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.2/howto/static-files/
 
-STATIC_URL = '/static/static/'
-
 MEDIA_URL = '/static/media/'
 
 MEDIA_ROOT = '/vol/web/media'
 
-STATIC_ROOT = '/vol/web/static'
+STATIC_URL = '/static/static/'
+
+STATIC_ROOT = '/vol/web/static/'
 
 
 # Default primary key field type
@@ -150,18 +160,20 @@ STATIC_ROOT = '/vol/web/static'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 
-AUTH_USER_MODEL = 'core.User'
+AUTH_USER_MODEL = 'user.User'
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
-        'rest_framework.authentication.SessionAuthentication',
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
     ),
     'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
 }
+
 SPECTACULAR_SETTINGS = {
     "TITLE": "Ecommerce API",
     "DESCRIPTION": 'DRF PROJECT',
 }
+
 
 # DEBUG_TOOLBAR
 INTERNAL_IPS = ('127.0.0.1', 'localhost')
@@ -179,6 +191,7 @@ IMPORT_FORMATS = [CSV, XLSX]
 # Celery Configuration Options
 CELERY_TASK_TRACK_STARTED = True
 CELERY_TASK_TIME_LIMIT = 30 * 60
+CELERY_BROKER_URL = 'redis://redis:6379'
 
 
 CACHES = {
@@ -192,4 +205,10 @@ CACHES = {
 }
 
 
-CELERY_BROKER_URL = 'redis://redis:6379'
+SIMPLE_JWT = {
+    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=5),
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=1),
+    "BLACKLIST_AFTER_ROTATION": False,
+    "SIGNING_KEY": 'dfsdfsf',
+    "AUTH_HEADER_TYPES": ("Bearer",),
+}
