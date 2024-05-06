@@ -5,11 +5,11 @@ from django.urls import path, include
 
 
 router = DefaultRouter()
-router.register(r"products", ProductViewSet)  # Registro de las vistas de productos bajo el endpoint "products"
-router.register(r"categories", CategoryViewSet)  # Registro de las vistas de categorías bajo el endpoint "categories"
+router.register(r"products", ProductViewSet)
+router.register(r"categories", CategoryViewSet)
 
 app_name = 'product'
 
 urlpatterns = [
-    path('', include(router.urls)),  # Incluye las URLs generadas por el enrutador
+    path('', include(router.urls)),
 ]
