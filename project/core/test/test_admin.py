@@ -26,21 +26,21 @@ class AdminSiteTest(TestCase):
 
     def test_list_users(self):
         """Test listed users"""
-        url = reverse('admin:core_user_changelist')
+        url = reverse('admin:user_user_changelist')
         response = self.client.get(url)
         self.assertContains(response, self.user.email)
         self.assertContains(response, self.user.firstname)
 
     def test_page_edit_user(self):
         """Test the edit user page"""
-        url = reverse('admin:core_user_change', args=[self.user.id])
+        url = reverse('admin:user_user_change', args=[self.admin_user.id])
         response = self.client.get(url)
 
         self.assertEqual(response.status_code, 200)
 
     def test_page_create_user(self):
         """Test create user admin page"""
-        url = reverse('admin:core_user_add')
+        url = reverse('admin:user_user_add')
         response = self.client.get(url)
 
         self.assertEqual(response.status_code, 200)
