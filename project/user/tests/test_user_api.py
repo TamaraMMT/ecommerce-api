@@ -11,7 +11,7 @@ from rest_framework import status
 
 
 REGISTER_USER_URL = reverse('user:register')
-TOKEN_URL = reverse('user:token')
+TOKEN_URL = reverse('user:login')
 PROFILE_USER = reverse('user:profile')
 
 
