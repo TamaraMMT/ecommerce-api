@@ -6,8 +6,14 @@ import pytest
 import uuid
 from django.core.exceptions import ValidationError
 from django.db.utils import IntegrityError, DataError
-from product.models import Category, Product, ProductLine, ProductImage, Attribute
-
+from product.models import (
+    Category,
+    Product,
+    ProductLine,
+    ProductImage,
+    Attribute,
+    ProductAttributeValue
+)
 pytestmark = pytest.mark.django_db
 
 
@@ -286,34 +292,32 @@ class TestAttributeModel:
         assert qs == 0
 
 
-class TestProductlineAttributeValueModel:
+class TestProductAttributeValueModel:
     def test_productline_attributes_unique_together(
             self,
             product_type_factory,
-            product_factory,
             attribute_factory,
             productline_factory,
-            productline_attribute_value_factory,
+            product_attribute_value_factory,
     ):
 
         # Create instances of ProductType, Attribute, Product and ProductLine
         product_type = product_type_factory()
-        attr_type = attribute_factory(product_type=product_type)
-        product = product_factory()
-        productline = productline_factory(product=product)
+        attribute = attribute_factory(product_type=product_type)
+        product_line = productline_factory()
 
         # Create instances of ProductlineAttributeValue
-        productline_attribute_value_factory(
-            attribute_value="AttributeValue",
-            attribute=attr_type,
-            productline=productline
+        product_attribute_value_factory(
+            value="AttributeValue",
+            attribute=attribute,
+            product_line=product_line
         )
 
         with pytest.raises(IntegrityError):
-            productline_attribute_value_factory(
-                attribute_value="AttributeValue",
-                attribute=attr_type,
-                productline=productline
+            product_attribute_value_factory(
+                value="AttributeValue",
+                attribute=attribute,
+                product_line=product_line
             )
 
     def test_attribute_on_delete_cascade_producttype(

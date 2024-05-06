@@ -7,7 +7,7 @@ from product.models import (
     ProductLine,
     ProductImage,
     ProductType,
-    ProductlineAttributeValue,
+    ProductAttributeValue,
 )
 
 
@@ -33,7 +33,6 @@ class AttributeFactory(DjangoModelFactory):
 
     attribute_name = factory.Sequence(lambda n: f"test_name_attr_{n}")
     product_type = factory.SubFactory(ProductTypeFactory)
-
 
 
 class ProductFactory(DjangoModelFactory):
@@ -73,10 +72,10 @@ class ProductImageFactory(DjangoModelFactory):
     order = factory.Sequence(lambda n: int(n))
 
 
-class ProductlineAttributeValueFactory(DjangoModelFactory):
+class ProductAttributeValueFactory(DjangoModelFactory):
     class Meta:
-        model = ProductlineAttributeValue
+        model = ProductAttributeValue
 
-    attribute_value = factory.Sequence(lambda n: f"test_name_attr_value{n}")
+    value = factory.Sequence(lambda n: f"test_name_attr_value{n}")
     attribute = factory.SubFactory(AttributeFactory)
-    productline = factory.SubFactory(ProductlineFactory)
+    product_line = factory.SubFactory(ProductlineFactory)
