@@ -22,7 +22,7 @@ def productimage_image_file_path(instance, filename):
     ext = os.path.splitext(filename)[1]
     filename = f'{uuid.uuid4()}{ext}'
 
-    return os.path.join('uploads', 'productimage', filename)
+    return os.path.join('productimage', filename)
 
 
 class IsActiveManager(models.Manager):
