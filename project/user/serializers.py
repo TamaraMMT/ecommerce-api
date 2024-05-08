@@ -1,11 +1,14 @@
 """
 Serializers for the client API View.
 """
-from rest_framework import serializers
+from typing_extensions import ReadOnly
 from django.utils.translation import gettext as _
 from rest_framework.serializers import ModelSerializer
-
+from rest_framework import serializers
 from django.contrib.auth import get_user_model
+from yaml import serialize
+
+from user.models import UserProfile
 
 
 class UserSerializer(ModelSerializer):
@@ -32,17 +35,17 @@ class UserSerializer(ModelSerializer):
         return user
 
 
-class UserProfileSerializer(serializers.ModelSerializer):
+class UserProfileSerializer(ModelSerializer):
     """Serializer for the user profile."""
+    email = serializers.CharField(source='user.email', read_only=True)
 
     class Meta:
-        model = get_user_model()
+        model = UserProfile
         fields = [
             'email',
-            'firstname',
-            'lastname',
+            'first_name',
+            'last_name',
             'phone_number',
             'shipping_address',
             'billing_address'
         ]
-        read_only_fields = ['email']

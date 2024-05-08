@@ -1,12 +1,12 @@
 """
 Views for the client API.
 """
+from .serializers import UserProfileSerializer
 from rest_framework import generics
-from rest_framework.views import APIView
+from rest_framework import generics
 from rest_framework.permissions import IsAuthenticated
 
 from .serializers import UserSerializer, UserProfileSerializer
-
 from rest_framework.response import Response
 
 
@@ -15,17 +15,26 @@ class CreateUserView(generics.CreateAPIView):
     serializer_class = UserSerializer
 
 
-class UserProfileView(APIView):
+class UserProfileView(generics.RetrieveUpdateAPIView):
     """View to retrieve and update user profile information."""
-    # serializer_class = UserProfileSerializer
     permission_classes = [IsAuthenticated]
+    serializer_class = UserProfileSerializer
 
     def get_object(self):
-        """Retrieve the currently authenticated user."""
-        return self.request.user
+        """Retrieve the currently authenticated user's profile."""
+        user = self.request.user
+        return user.userprofile
 
-    def get(self, request):
+    def get(self, request, *args, **kwargs):
         """Retrieve the currently authenticated user's profile information."""
-        user = self.get_object()
-        serializer = UserProfileSerializer(user)
+        profile = self.get_object()
+        serializer = self.get_serializer(profile)
+        return Response(serializer.data)
+
+    def put(self, request, *args, **kwargs):
+        """Update the currently authenticated user's profile information."""
+        profile = self.get_object()
+        serializer = self.get_serializer(profile, data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
         return Response(serializer.data)
