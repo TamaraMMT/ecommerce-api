@@ -3,7 +3,6 @@ Views for the client API.
 """
 from .serializers import UserProfileSerializer
 from rest_framework import generics
-from rest_framework import generics
 from rest_framework.permissions import IsAuthenticated
 
 from .serializers import UserSerializer, UserProfileSerializer
