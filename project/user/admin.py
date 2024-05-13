@@ -65,5 +65,7 @@ class UserProfileAdmin(admin.ModelAdmin):
         }),
     )
 
+    readonly_fields = ['user']
+
 
 admin.site.register(UserProfile, UserProfileAdmin)
