@@ -22,9 +22,12 @@ class Manager(BaseUserManager):
 
         return user
 
-    def create_superuser(self, email, password):
-        """Create super user and return"""
-        user = self.create_user(email, password)
+    def create_superuser(self, email, password=None, **others_fields):
+        """Create superuser and return"""
+        if not email:
+            raise ValueError("The email cannot be empty")
+        user = self.model(email=self.normalize_email(email), **others_fields)
+        user.set_password(password)
         user.is_staff = True
         user.is_superuser = True
         user.save(using=self._db)
