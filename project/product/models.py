@@ -22,7 +22,7 @@ def productimage_image_file_path(instance, filename):
     ext = os.path.splitext(filename)[1]
     filename = f'{uuid.uuid4()}{ext}'
 
-    return os.path.join('uploads', 'productimage', filename)
+    return os.path.join('productimage', filename)
 
 
 class IsActiveManager(models.Manager):
@@ -56,6 +56,13 @@ class Category(MPTTModel):
         return str(self.name)
 
 
+class ProductType(models.Model):
+    name = models.CharField(max_length=100, unique=True)
+
+    def __str__(self):
+        return str(self.name)
+
+
 class Product(models.Model):
     name = models.CharField(max_length=100)
     slug = models.SlugField(max_length=255, unique=True)
@@ -66,7 +73,7 @@ class Product(models.Model):
     category = TreeForeignKey("Category", on_delete=models.PROTECT)
     is_active = models.BooleanField(default=True)
     product_type = models.ForeignKey(
-        "ProductType",
+        ProductType,
         on_delete=models.PROTECT,
         related_name="product_type_product"
     )
@@ -85,14 +92,16 @@ class ProductLine(models.Model):
     sku = models.CharField(max_length=10, unique=True)
     stock_qty = models.PositiveIntegerField()
     product = models.ForeignKey(
-        Product, on_delete=models.PROTECT, related_name="product_line"
+        Product,
+        on_delete=models.PROTECT,
+        related_name="product_line"
     )
     is_active = models.BooleanField(default=False)
     order = models.PositiveIntegerField()
     attributes = models.ManyToManyField(
         "Attribute",
-        through="ProductlineAttributeValue",
-        related_name="productline_attributes"
+        through="ProductAttributeValue",
+        related_name="product_lines"
     )
     objects = IsActiveManager()
 
@@ -118,51 +127,29 @@ class ProductImage(models.Model):
         return str(self.alt_text)
 
 
-class ProductType(models.Model):
-    name = models.CharField(max_length=100, unique=True)
-
-    def __str__(self):
-        return str(self.name)
-
-
 class Attribute(models.Model):
-    """
-    Represents an attribute associated with a product type,
-    such as size, color, or material.
-    """
     attribute_name = models.CharField(max_length=100)
     product_type = models.ForeignKey(
         ProductType,
         on_delete=models.CASCADE,
-        related_name="product_type_attributes"
+        related_name="product_type",
     )
 
     def __str__(self):
         return f"{self.attribute_name}"
 
-    class Meta:
-        unique_together = ("attribute_name", "product_type")
 
-
-class ProductlineAttributeValue(models.Model):
-    """
-    Represents the specific value of an attribute for a particular product line.
-    """
-    attribute = models.ForeignKey(
-        Attribute,
-        on_delete=models.CASCADE,
-        related_name="productline_attributes_attr",
-
-    )
-    attribute_value = models.CharField(max_length=100)
-    productline = models.ForeignKey(
+class ProductAttributeValue(models.Model):
+    attribute = models.ForeignKey(Attribute, on_delete=models.CASCADE)
+    value = models.CharField(max_length=100)
+    product_line = models.ForeignKey(
         ProductLine,
         on_delete=models.CASCADE,
-        related_name="productline_attributes_pl",
+        related_name="product_line_attributes"
     )
 
     def __str__(self):
-        return f"{self.attribute}-{self.attribute_value}"
+        return f"{self.attribute.attribute_name} - {self.value}"
 
     class Meta:
-        unique_together = ("attribute", "attribute_value", "productline")
+        unique_together = ("attribute", "product_line", "value")

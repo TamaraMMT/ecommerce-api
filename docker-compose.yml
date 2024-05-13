@@ -22,6 +22,7 @@ services:
       - DB_PASSWORD=123pass
     depends_on:
       - db
+      - redis
 
   db:
     image: postgres:15-alpine
@@ -39,6 +40,26 @@ services:
       timeout: 5s
       retries: 5
 
+  redis:
+    image: redis:7.0.5-alpine
+    volumes:
+      - redis-data:/data
+    ports:
+      - "6379:6379"
+
+  celery-worker:
+    build: .
+    command: celery -A project worker --loglevel=info
+    depends_on:
+      - project
+      - redis
+    volumes:
+      - ./project:/project:ro
+    environment:
+      - CELERY_BROKER_URL=redis://redis:6379
+      - CELERY_RESULT_BACKEND=redis://redis:6379
+
 volumes:
   data-db-dev:
   media-db-dev:
+  redis-data:

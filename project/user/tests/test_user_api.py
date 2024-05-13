@@ -4,15 +4,16 @@ Test for Users API
 
 
 from django.test import TestCase
-from django.contrib.auth import get_user_model
 from django.urls import reverse
-
+from django.contrib.auth import get_user_model
 from rest_framework.test import APIClient
 from rest_framework import status
 
 
-REGISTER_USER_URL = reverse('user:create')
-TOKEN_URL = reverse('user:token')
+REGISTER_USER_URL = reverse('user:register')
+TOKEN_URL = reverse('user:login')
+PROFILE_USER = reverse('user:profile')
+
 
 def create_user(**params):
     """Create new user and return"""
@@ -30,8 +31,7 @@ class PublicUser(TestCase):
         data = {
             'email': 'usertest@example.com',
             'password': '123password',
-            'firstname': 'Firstame',
-            'lastname': 'Lastname',
+
         }
         response = self.client.post(REGISTER_USER_URL, data)
 
@@ -43,10 +43,9 @@ class PublicUser(TestCase):
     def test_user_email_already_exists(self):
         """Test returned error if email exists"""
         data = {
-            'email': 'usertest@example.com',
+            'email': 'usertest1@example.com',
             'password': '123password',
-            'firstname': 'Firstame',
-            'lastname': 'Lastname',
+
         }
         create_user(**data)
 
@@ -59,8 +58,7 @@ class PublicUser(TestCase):
         data = {
             'email': 'usertest@example.com',
             'password': '123',
-            'firstname': 'Firstame',
-            'lastname': 'Lastname',
+
         }
         response = self.client.post(REGISTER_USER_URL, data)
 
@@ -84,7 +82,8 @@ class PublicUser(TestCase):
         }
         response = self.client.post(TOKEN_URL, data_user)
 
-        self.assertIn('token', response.data)
+        self.assertIn('access', response.data)
+
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_access_token_user_unauthorized(self):
@@ -100,6 +99,5 @@ class PublicUser(TestCase):
         }
         response = self.client.post(TOKEN_URL, data_user)
 
-        self.assertNotIn('token', response.data)
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-
+        self.assertNotIn('access', response.data)
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
