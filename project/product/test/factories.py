@@ -1,5 +1,7 @@
 from factory.django import DjangoModelFactory
+from django.core.files.uploadedfile import SimpleUploadedFile
 import factory
+import uuid
 from product.models import (
     Attribute,
     Category,
@@ -9,6 +11,19 @@ from product.models import (
     ProductType,
     ProductAttributeValue,
 )
+
+
+def generate_image_file():
+    """
+    Generates a dummy image file for testing.
+    """
+    ext = '.png'
+    filename = f'{uuid.uuid4()}{ext}'
+    return SimpleUploadedFile(
+        name=filename,
+        content=b'fake image content',
+        content_type='image/png'
+    )
 
 
 class CategoryFactory(DjangoModelFactory):
@@ -67,7 +82,7 @@ class ProductImageFactory(DjangoModelFactory):
         model = ProductImage
 
     alt_text = factory.Sequence(lambda n: f"test alternative text {n}")
-    url = factory.LazyAttribute(lambda o: f"{o.alt_text}.jpg")
+    url = factory.LazyFunction(generate_image_file)
     productline = factory.RelatedFactory(ProductlineFactory)
     order = factory.Sequence(lambda n: int(n))
 
