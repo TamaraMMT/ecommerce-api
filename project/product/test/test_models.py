@@ -1,19 +1,22 @@
 """
 Tests for models.
 """
+import os
 from decimal import Decimal
 import pytest
-import uuid
 from django.core.exceptions import ValidationError
 from django.db.utils import IntegrityError, DataError
+from django.core.files.uploadedfile import SimpleUploadedFile
+
+
 from product.models import (
     Category,
     Product,
     ProductLine,
     ProductImage,
-    Attribute,
-    ProductAttributeValue
+    Attribute
 )
+
 pytestmark = pytest.mark.django_db
 
 
@@ -191,23 +194,38 @@ class TestProductImageModel:
 
         assert image.__str__() == 'alt_img_test'
 
-    def test_uuid_url_image_productline(
+    @pytest.mark.django_db
+    def test_productimage_image_file_path(
         self,
         product_image_factory,
         productline_factory,
     ):
-
         productline = productline_factory()
-        ext = '.png'
-        uuidtest = f'{uuid.uuid4()}{ext}'
-        image = product_image_factory.create(
-            product_line=productline,
-            url=uuidtest
-        )
-        image.save()
-        filename = image.url
 
-        assert filename == uuidtest
+        original_filename = 'example.png'
+        uploaded_file = SimpleUploadedFile(
+            name=original_filename,
+            content=b'fake image content',
+            content_type='image/png'
+        )
+
+        image = product_image_factory(
+            product_line=productline,
+            url=uploaded_file
+        )
+
+        image.save()
+
+        saved_filename = os.path.basename(image.url.name)
+
+        assert saved_filename.endswith('.png')
+
+        expected_path = os.path.join('productimage', saved_filename)
+
+        assert image.url.name == expected_path
+
+        image.delete()
+        productline.delete()
 
     def test_productimage_delete_cascade_productline(
         self,
